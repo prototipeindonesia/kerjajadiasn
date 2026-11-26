@@ -12,7 +12,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen">
 
-<!-- LOGIN VIEW -->
+<!-- LOGIN -->
 <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md">
     <div class="text-center mb-6">
@@ -35,7 +35,7 @@
   </div>
 </div>
 
-<!-- DASHBOARD VIEW -->
+<!-- DASHBOARD -->
 <div id="dashView" class="hidden min-h-screen">
   <nav class="bg-white border-b shadow-sm sticky top-0 z-30">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -48,16 +48,15 @@
   </nav>
 
   <div class="container mx-auto px-4 py-6 max-w-7xl">
-    <!-- TABS -->
     <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
-      <button onclick="showTab('overview')" id="tab-overview" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white"><i class="fa-solid fa-chart-pie mr-2"></i>Overview</button>
-      <button onclick="showTab('soal')" id="tab-soal" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-list mr-2"></i>Kelola Soal</button>
-      <button onclick="showTab('peserta')" id="tab-peserta" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-users mr-2"></i>Peserta</button>
-      <button onclick="showTab('pendaftar')" id="tab-pendaftar" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-user-plus mr-2"></i>Pendaftar</button>
-      <button onclick="showTab('tryout')" id="tab-tryout" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-list-check mr-2"></i>Tryout</button>
+      <button onclick="showTab('overview')" id="tab-overview" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white whitespace-nowrap"><i class="fa-solid fa-chart-pie mr-2"></i>Overview</button>
+      <button onclick="showTab('soal')" id="tab-soal" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700 whitespace-nowrap"><i class="fa-solid fa-list mr-2"></i>Kelola Soal</button>
+      <button onclick="showTab('peserta')" id="tab-peserta" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700 whitespace-nowrap"><i class="fa-solid fa-users mr-2"></i>Peserta</button>
+      <button onclick="showTab('pendaftar')" id="tab-pendaftar" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700 whitespace-nowrap"><i class="fa-solid fa-user-plus mr-2"></i>Pendaftar <span id="badgePendaftar" class="hidden ml-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full"></span></button>
+      <button onclick="showTab('tryout')" id="tab-tryout" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700 whitespace-nowrap"><i class="fa-solid fa-list-check mr-2"></i>Tryout</button>
     </div>
 
-    <!-- OVERVIEW TAB -->
+    <!-- OVERVIEW -->
     <div id="panel-overview" class="tabPanel">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Total Peserta</div><div id="ovPeserta" class="text-3xl font-black text-blue-600">-</div></div>
@@ -67,12 +66,12 @@
       </div>
     </div>
 
-    <!-- SOAL TAB -->
+    <!-- SOAL -->
     <div id="panel-soal" class="tabPanel hidden">
       <div class="bg-white rounded-2xl p-6 shadow-sm">
         <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
           <h2 class="font-bold text-xl"><i class="fa-solid fa-list text-purple-600 mr-2"></i>Bank Soal</h2>
-          <div class="flex gap-2">
+          <div class="flex flex-wrap gap-2">
             <select id="filterTryoutSoal" onchange="loadSoal()" class="px-3 py-2 rounded-lg border text-sm"></select>
             <button onclick="downloadTemplate()" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-200"><i class="fa-solid fa-download mr-1"></i>Template Excel</button>
             <button onclick="document.getElementById('fileExcel').click()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700"><i class="fa-solid fa-file-excel mr-1"></i>Import Excel</button>
@@ -80,23 +79,26 @@
           </div>
         </div>
         <div id="soalList" class="space-y-2 max-h-[600px] overflow-y-auto">
-          <p class="text-center text-slate-400 py-4">Loading...</p>
+          <p class="text-center text-slate-400 py-4">Pilih tryout dulu</p>
         </div>
       </div>
     </div>
 
-    <!-- PESERTA TAB -->
+    <!-- PESERTA -->
     <div id="panel-peserta" class="tabPanel hidden">
       <div class="bg-white rounded-2xl p-6 shadow-sm">
-        <div class="flex justify-between items-center mb-5">
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
           <h2 class="font-bold text-xl"><i class="fa-solid fa-users text-blue-600 mr-2"></i>Peserta Aktif</h2>
-          <button onclick="showAddPeserta()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700"><i class="fa-solid fa-plus mr-1"></i>Buat Kode</button>
+          <div class="flex gap-2">
+            <button onclick="loadGroupLinkSetting()" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-200"><i class="fa-solid fa-link mr-1"></i>Atur Link Grup</button>
+            <button onclick="showAddPeserta()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700"><i class="fa-solid fa-plus mr-1"></i>Buat Kode Baru</button>
+          </div>
         </div>
         <div id="pesertaList" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
       </div>
     </div>
 
-    <!-- PENDAFTAR TAB -->
+    <!-- PENDAFTAR -->
     <div id="panel-pendaftar" class="tabPanel hidden">
       <div class="bg-white rounded-2xl p-6 shadow-sm">
         <h2 class="font-bold text-xl mb-4"><i class="fa-solid fa-user-plus text-yellow-600 mr-2"></i>Pendaftar Baru</h2>
@@ -104,7 +106,7 @@
       </div>
     </div>
 
-    <!-- TRYOUT TAB -->
+    <!-- TRYOUT -->
     <div id="panel-tryout" class="tabPanel hidden">
       <div class="bg-white rounded-2xl p-6 shadow-sm">
         <div class="flex justify-between items-center mb-5">
@@ -117,40 +119,71 @@
   </div>
 </div>
 
-<!-- MODAL Buat Peserta -->
-<div id="modalPeserta" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-2xl max-w-md w-full p-6">
-    <h3 class="text-xl font-bold mb-4">Buat Kode Peserta</h3>
-    <div class="space-y-3">
-      <input id="pNama" placeholder="Nama" class="w-full px-4 py-2.5 rounded-lg border">
-      <input id="pWa" placeholder="Nomor WA" class="w-full px-4 py-2.5 rounded-lg border">
-      <select id="pPaket" class="w-full px-4 py-2.5 rounded-lg border">
-        <option value="1">Paket 1 - Standard</option>
-        <option value="2">Paket 2 - Sukses</option>
-        <option value="3">Paket 3 - Master</option>
-        <option value="gratis">Tryout Gratis</option>
-      </select>
-      <div class="bg-blue-50 rounded-lg p-3">
-        <p class="text-xs font-bold text-blue-700 mb-1">Kode Akses (otomatis):</p>
-        <p id="previewKode" class="font-mono font-bold text-lg text-blue-800"></p>
+<!-- MODAL CREATE PESERTA (2 STEP) -->
+<div id="modalPeserta" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4 overflow-y-auto">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6 my-8">
+
+    <!-- STEP 1: Form -->
+    <div id="step1Form">
+      <h3 class="text-xl font-bold mb-4">Buat Kode Peserta Baru</h3>
+      <div class="space-y-3">
+        <input id="pNama" placeholder="Nama Lengkap" class="w-full px-4 py-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500">
+        <input id="pWa" placeholder="Nomor WhatsApp (08...)" class="w-full px-4 py-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500">
+        <select id="pPaket" class="w-full px-4 py-2.5 rounded-lg border outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="1">Paket 1 - Standard</option>
+          <option value="2">Paket 2 - Sukses</option>
+          <option value="3">Paket 3 - Master</option>
+          <option value="gratis">Tryout Gratis</option>
+        </select>
+        <div class="bg-blue-50 rounded-lg p-3">
+          <p class="text-xs font-bold text-blue-700 mb-1">Kode Akses (otomatis):</p>
+          <p id="previewKode" class="font-mono font-bold text-lg text-blue-800"></p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeModal('modalPeserta')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
+        <button onclick="savePeserta()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700">Simpan</button>
       </div>
     </div>
-    <div class="flex gap-2 mt-5">
-      <button onclick="closeModal('modalPeserta')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
-      <button onclick="savePeserta()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold">Simpan & Kirim WA</button>
+
+    <!-- STEP 2: Result -->
+    <div id="step2Result" class="hidden">
+      <div class="text-center mb-4">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-check text-green-600 text-2xl"></i></div>
+        <h3 class="text-xl font-bold">Kode Berhasil Dibuat!</h3>
+        <p class="text-slate-500 text-sm mt-1">Untuk <strong id="resultNama"></strong></p>
+      </div>
+      <div class="bg-blue-50 rounded-xl p-4 mb-4 text-center">
+        <p class="text-xs font-bold text-blue-600 uppercase mb-1">Kode Akses</p>
+        <p id="resultKode" class="font-mono font-black text-2xl text-blue-800"></p>
+      </div>
+      <div class="bg-slate-50 rounded-xl p-3 mb-3">
+        <label class="text-xs font-bold text-slate-600 block mb-1">Link Grup WA (untuk ajakan)</label>
+        <input id="resultGroupLink" placeholder="https://chat.whatsapp.com/..." class="w-full px-3 py-2 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-green-500">
+      </div>
+      <div class="space-y-2">
+        <button onclick="kirimKonfirmasi()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">
+          <i class="fa-brands fa-whatsapp mr-2"></i>Kirim Konfirmasi via WA
+        </button>
+        <button onclick="kirimAjakanGrup()" class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600">
+          <i class="fa-brands fa-whatsapp mr-2"></i>Kirim Ajakan Masuk Grup
+        </button>
+      </div>
+      <button onclick="closeModal('modalPeserta')" class="w-full mt-3 bg-slate-100 py-3 rounded-xl font-bold hover:bg-slate-200">Tutup</button>
     </div>
+
   </div>
 </div>
 
 <!-- MODAL Tryout -->
 <div id="modalTryout" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl max-w-md w-full p-6">
-    <h3 class="text-xl font-bold mb-4">Tambah / Edit Tryout</h3>
+    <h3 class="text-xl font-bold mb-4">Tambah Tryout</h3>
     <div class="space-y-3">
       <input id="tNama" placeholder="Nama Tryout" class="w-full px-4 py-2.5 rounded-lg border">
       <select id="tTipe" class="w-full px-4 py-2.5 rounded-lg border">
         <option value="premium">Premium</option>
-        <option value="gratis">Gratis (Sabtu)</option>
+        <option value="gratis">Gratis (Rabu & Sabtu)</option>
       </select>
       <select id="tPaket" class="w-full px-4 py-2.5 rounded-lg border">
         <option value="1">Paket 1</option>
@@ -172,6 +205,19 @@
   </div>
 </div>
 
+<!-- MODAL Atur Link Grup -->
+<div id="modalGroupLink" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <h3 class="text-xl font-bold mb-4"><i class="fa-solid fa-link text-blue-600 mr-2"></i>Atur Link Grup Default</h3>
+    <p class="text-sm text-slate-500 mb-3">Link ini akan otomatis muncul saat membuat kode peserta & mengirim ajakan grup.</p>
+    <input id="globalGroupLink" placeholder="https://chat.whatsapp.com/..." class="w-full px-4 py-2.5 rounded-lg border text-sm mb-4">
+    <div class="flex gap-2">
+      <button onclick="closeModal('modalGroupLink')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
+      <button onclick="saveGroupLink()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold">Simpan</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -180,30 +226,21 @@
 let isAdmin = false;
 let currentTab = 'overview';
 let selectedKodePreview = '';
+let currentPesertaData = { kode: '', nama: '', wa: '', groupLink: '' };
+let savedGroupLink = '';
 
-// ==================== AUTH ====================
+// ============ AUTH ============
 document.getElementById('adminLogin').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = e.target.querySelector('button');
   btn.disabled = true; btn.textContent = 'Memeriksa...';
   try {
-    await auth.signInWithEmailAndPassword(
-      document.getElementById('admEmail').value,
-      document.getElementById('admPass').value
-    );
-    const uid = auth.currentUser.uid;
-    const adminDoc = await db.collection('admins').doc(uid).get();
-    if (!adminDoc.exists) {
-      await auth.signOut();
-      throw new Error('Akun ini bukan admin. Tambahkan UID Anda ke collection "admins".');
-    }
-    isAdmin = true;
-    showDash();
-  } catch (err) {
-    alert('Login gagal: ' + err.message);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Masuk';
-  }
+    await auth.signInWithEmailAndPassword(document.getElementById('admEmail').value, document.getElementById('admPass').value);
+    const adminDoc = await db.collection('admins').doc(auth.currentUser.uid).get();
+    if (!adminDoc.exists) { await auth.signOut(); throw new Error('Akun ini bukan admin'); }
+    isAdmin = true; showDash();
+  } catch (err) { alert('Login gagal: ' + err.message); }
+  finally { btn.disabled = false; btn.textContent = 'Masuk'; }
 });
 
 auth.onAuthStateChanged(async (user) => {
@@ -218,13 +255,14 @@ function showDash() {
   document.getElementById('dashView').classList.remove('hidden');
   loadOverview();
   loadTryoutDropdown();
+  loadGroupLinkSetting();
 }
 
 function adminLogout() {
   if (confirm('Keluar dari admin panel?')) auth.signOut().then(() => location.reload());
 }
 
-// ==================== TABS ====================
+// ============ TABS ============
 function showTab(name) {
   currentTab = name;
   document.querySelectorAll('.tabPanel').forEach(p => p.classList.add('hidden'));
@@ -244,7 +282,7 @@ function showTab(name) {
   if (name === 'tryout') loadTryoutAdmin();
 }
 
-// ==================== OVERVIEW ====================
+// ============ OVERVIEW ============
 async function loadOverview() {
   try {
     const [pesertaSnap, soalSnap, pendaftarSnap, hasilSnap] = await Promise.all([
@@ -257,20 +295,48 @@ async function loadOverview() {
     document.getElementById('ovSoal').textContent = soalSnap.size;
     document.getElementById('ovPending').textContent = pendaftarSnap.size;
     document.getElementById('ovHasil').textContent = hasilSnap.size;
+
+    // Badge pending
+    const badge = document.getElementById('badgePendaftar');
+    if (pendaftarSnap.size > 0) { badge.textContent = pendaftarSnap.size; badge.classList.remove('hidden'); }
+    else badge.classList.add('hidden');
   } catch (e) { console.error(e); }
 }
 
-// ==================== TRYOUT DROPDOWN ====================
+// ============ GROUP LINK ============
+async function loadGroupLinkSetting() {
+  try {
+    const doc = await db.collection('settings').doc('grup').get();
+    savedGroupLink = doc.exists ? (doc.data().link || '') : '';
+  } catch (e) { savedGroupLink = ''; }
+}
+
+function loadGroupLinkSetting() {
+  db.collection('settings').doc('grup').get().then(doc => {
+    savedGroupLink = doc.exists ? (doc.data().link || '') : '';
+    document.getElementById('globalGroupLink').value = savedGroupLink;
+    document.getElementById('modalGroupLink').classList.remove('hidden');
+    document.getElementById('modalGroupLink').classList.add('flex');
+  });
+}
+
+async function saveGroupLink() {
+  const link = document.getElementById('globalGroupLink').value.trim();
+  await db.collection('settings').doc('grup').set({ link }, { merge: true });
+  savedGroupLink = link;
+  closeModal('modalGroupLink');
+  alert('✅ Link grup default disimpan!');
+}
+
+// ============ TRYOUT DROPDOWN ============
 async function loadTryoutDropdown() {
   const snap = await db.collection('tryout').get();
   const sel = document.getElementById('filterTryoutSoal');
   sel.innerHTML = '<option value="">-- Pilih Tryout --</option>';
-  snap.forEach(d => {
-    sel.innerHTML += `<option value="${d.id}">${d.data().nama}</option>`;
-  });
+  snap.forEach(d => sel.innerHTML += `<option value="${d.id}">${d.data().nama}</option>`);
 }
 
-// ==================== SOAL ====================
+// ============ SOAL ============
 async function loadSoal() {
   const tryoutId = document.getElementById('filterTryoutSoal').value;
   const box = document.getElementById('soalList');
@@ -282,10 +348,7 @@ async function loadSoal() {
   snap.forEach(d => list.push({id: d.id, ...d.data()}));
   list.sort((a,b) => a.nomor - b.nomor);
 
-  if (list.length === 0) {
-    box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada soal. Import dari Excel.</p>';
-    return;
-  }
+  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada soal. Import dari Excel.</p>'; return; }
 
   box.innerHTML = list.map(s => `
     <div class="border rounded-xl p-3 hover:bg-slate-50">
@@ -295,7 +358,7 @@ async function loadSoal() {
             <span class="text-xs font-bold px-2 py-0.5 rounded ${s.kategori==='TWK'?'bg-blue-100 text-blue-700':s.kategori==='TIU'?'bg-yellow-100 text-yellow-700':'bg-purple-100 text-purple-700'}">${s.kategori}</span>
             <span class="text-xs text-slate-400">No. ${s.nomor}</span>
           </div>
-          <p class="text-sm font-medium text-slate-800 line-clamp-2">${s.pertanyaan}</p>
+          <p class="text-sm font-medium text-slate-800">${s.pertanyaan}</p>
           <p class="text-xs text-slate-500 mt-1">Jawaban: <strong>${s.jawabanBenar||'-'}</strong></p>
         </div>
         <button onclick="hapusSoal('${s.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
@@ -310,13 +373,13 @@ async function hapusSoal(id) {
   loadSoal();
 }
 
-// ==================== EXCEL IMPORT ====================
+// ============ EXCEL ============
 function downloadTemplate() {
   const data = [
     ['kategori','pertanyaan','pilihan_a','pilihan_b','pilihan_c','pilihan_d','pilihan_e','jawaban_benar','pembahasan','skor_a','skor_b','skor_c','skor_d','skor_e'],
-    ['TWK','Contoh soal TWK...','Pilihan A','Pilihan B','Pilihan C','Pilihan D','Pilihan E','A','Pembahasan...','','','','',''],
-    ['TIU','Contoh soal TIU...','Pilihan A','Pilihan B','Pilihan C','Pilihan D','Pilihan E','B','Pembahasan...','','','','',''],
-    ['TKP','Contoh soal TKP...','Pilihan A','Pilihan B','Pilihan C','Pilihan D','Pilihan E','','Pembahasan...',1,2,3,4,5]
+    ['TWK','Contoh soal TWK...','A','B','C','D','E','A','Pembahasan...','','','','',''],
+    ['TIU','Contoh soal TIU...','A','B','C','D','E','B','Pembahasan...','','','','',''],
+    ['TKP','Contoh soal TKP...','A','B','C','D','E','','Pembahasan...',1,2,3,4,5]
   ];
   const ws = XLSX.utils.aoa_to_sheet(data);
   const wb = XLSX.utils.book_new();
@@ -327,7 +390,6 @@ function downloadTemplate() {
 async function importExcel(e) {
   const tryoutId = document.getElementById('filterTryoutSoal').value;
   if (!tryoutId) { alert('Pilih tryout dulu!'); e.target.value=''; return; }
-
   const file = e.target.files[0];
   if (!file) return;
 
@@ -337,10 +399,8 @@ async function importExcel(e) {
       const wb = XLSX.read(evt.target.result, {type:'binary'});
       const ws = wb.Sheets[wb.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(ws);
-
       if (rows.length === 0) throw new Error('File kosong');
 
-      // Hitung nomor urut awal
       const existing = await db.collection('soal').where('tryoutId','==',tryoutId).get();
       let nomor = existing.size + 1;
 
@@ -350,44 +410,32 @@ async function importExcel(e) {
       for (const r of rows) {
         if (!r.pertanyaan || !r.kategori) continue;
         const ref = db.collection('soal').doc();
-        const data = {
-          tryoutId,
-          nomor: nomor++,
+        batch.set(ref, {
+          tryoutId, nomor: nomor++,
           kategori: String(r.kategori).toUpperCase().trim(),
           pertanyaan: String(r.pertanyaan).trim(),
           pilihan: {
-            a: String(r.pilihan_a||'').trim(),
-            b: String(r.pilihan_b||'').trim(),
-            c: String(r.pilihan_c||'').trim(),
-            d: String(r.pilihan_d||'').trim(),
+            a: String(r.pilihan_a||'').trim(), b: String(r.pilihan_b||'').trim(),
+            c: String(r.pilihan_c||'').trim(), d: String(r.pilihan_d||'').trim(),
             e: String(r.pilihan_e||'').trim()
           },
           jawabanBenar: String(r.jawaban_benar||'').toUpperCase().trim(),
           pembahasan: String(r.pembahasan||'').trim(),
-          skor: {
-            a: Number(r.skor_a)||0, b: Number(r.skor_b)||0, c: Number(r.skor_c)||0,
-            d: Number(r.skor_d)||0, e: Number(r.skor_e)||0
-          },
+          skor: { a: Number(r.skor_a)||0, b: Number(r.skor_b)||0, c: Number(r.skor_c)||0, d: Number(r.skor_d)||0, e: Number(r.skor_e)||0 },
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        batch.set(ref, data);
+        });
         count++;
       }
-
       await batch.commit();
       alert(`✅ Berhasil import ${count} soal!`);
-      loadSoal();
-      loadOverview();
-    } catch (err) {
-      alert('Gagal import: ' + err.message);
-    } finally {
-      e.target.value = '';
-    }
+      loadSoal(); loadOverview();
+    } catch (err) { alert('Gagal import: ' + err.message); }
+    finally { e.target.value = ''; }
   };
   reader.readAsBinaryString(file);
 }
 
-// ==================== PESERTA ====================
+// ============ PESERTA ============
 async function loadPeserta() {
   const box = document.getElementById('pesertaList');
   box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
@@ -398,30 +446,39 @@ async function loadPeserta() {
 
   if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada peserta.</p>'; return; }
 
-  box.innerHTML = list.map(p => `
-    <div class="border rounded-xl p-3 flex justify-between items-center gap-3">
-      <div class="flex-1 min-w-0">
+  box.innerHTML = list.map(p => {
+    const waLink = (p.wa||'').replace(/\D/g,'').replace(/^0/, '62');
+    return `
+    <div class="border rounded-xl p-3 flex flex-wrap justify-between items-center gap-2">
+      <div class="flex-1 min-w-[200px]">
         <p class="font-bold text-sm">${p.nama || '-'}</p>
         <p class="text-xs text-slate-500 font-mono">${p.kode}</p>
         <p class="text-xs text-slate-400">Paket ${p.paket} · WA: ${p.wa||'-'}</p>
       </div>
-      <div class="flex items-center gap-1">
-        <button onclick="waKode('${p.kode}','${p.nama||''}','${p.wa||''}')" class="text-green-600 hover:bg-green-50 p-2 rounded-lg"><i class="fa-brands fa-whatsapp"></i></button>
+      <div class="flex items-center gap-1 flex-wrap">
+        <button onclick="resendKonfirmasi('${p.kode}','${p.nama||''}','${p.wa||''}')" title="Kirim Konfirmasi" class="bg-green-100 text-green-700 hover:bg-green-200 p-2 rounded-lg text-xs font-bold">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+        <button onclick="resendAjakan('${p.kode}','${p.nama||''}','${p.wa||''}','${p.groupLink||''}')" title="Ajakan Grup" class="bg-blue-100 text-blue-700 hover:bg-blue-200 p-2 rounded-lg text-xs font-bold">
+          <i class="fa-solid fa-user-group"></i>
+        </button>
         <button onclick="toggleAktif('${p.kode}', ${p.aktif})" class="text-${p.aktif?'green':'red'}-600 hover:bg-${p.aktif?'green':'red'}-50 p-2 rounded-lg">
           <i class="fa-solid fa-${p.aktif?'toggle-on':'toggle-off'}"></i>
         </button>
         <button onclick="hapusPeserta('${p.kode}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 async function showAddPeserta() {
-  const kode = KJ.genCode();
-  selectedKodePreview = kode;
-  document.getElementById('previewKode').textContent = kode;
+  selectedKodePreview = KJ.genCode();
+  document.getElementById('previewKode').textContent = selectedKodePreview;
   document.getElementById('pNama').value = '';
   document.getElementById('pWa').value = '';
+  await loadGroupLinkSetting();
+  document.getElementById('step1Form').classList.remove('hidden');
+  document.getElementById('step2Result').classList.add('hidden');
   document.getElementById('modalPeserta').classList.remove('hidden');
   document.getElementById('modalPeserta').classList.add('flex');
 }
@@ -430,32 +487,64 @@ async function savePeserta() {
   const nama = document.getElementById('pNama').value.trim();
   const wa = document.getElementById('pWa').value.trim();
   const paket = document.getElementById('pPaket').value;
-  if (!nama) { alert('Nama wajib diisi'); return; }
+  if (!nama || !wa) { alert('Nama & WA wajib diisi'); return; }
 
   const kode = selectedKodePreview;
   const expired = paket === 'gratis' ? null : new Date(Date.now() + 365*24*60*60*1000);
 
   await db.collection('peserta').doc(kode).set({
-    kode, nama, wa, paket,
-    aktif: true,
-    expired: expired,
+    kode, nama, wa, paket, aktif: true, expired,
+    groupLink: savedGroupLink,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
 
-  closeModal('modalPeserta');
-  waKode(kode, nama, wa);
-  loadPeserta();
-  loadOverview();
+  // Simpan data untuk tombol WA
+  currentPesertaData = { kode, nama, wa, groupLink: savedGroupLink };
+
+  // Tampilkan step 2
+  document.getElementById('resultNama').textContent = nama;
+  document.getElementById('resultKode').textContent = kode;
+  document.getElementById('resultGroupLink').value = savedGroupLink;
+  document.getElementById('step1Form').classList.add('hidden');
+  document.getElementById('step2Result').classList.remove('hidden');
+
+  loadPeserta(); loadOverview();
 }
 
-function waKode(kode, nama, wa) {
-  const msg = `Halo ${nama}, berikut kode akses Kerja Jadi ASN Anda:
+// ============ SEND WA FUNCTIONS ============
+function kirimKonfirmasi() {
+  const { kode, nama, wa } = currentPesertaData;
+  const msg = `Halo *${nama}* 👋\n\nSelamat! Pendaftaran Anda di *Kerja Jadi ASN* telah *DISETUJUI* ✅\n\n🔑 *Kode Akses Anda:*\n${kode}\n\n📍 *Cara Login:*\n1. Buka ${location.origin}/login.html\n2. Masukkan kode di atas\n3. Mulai kerjakan tryout!\n\n⚠️ Simpan kode ini baik-baik dan jangan dibagikan ke siapapun.\n\nSemangat meraih mimpi jadi ASN! 💪\n\n~ Tim Kerja Jadi ASN`;
+  const waNum = wa.replace(/\D/g,'').replace(/^0/, '62');
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+}
 
-🔑 *KODE: ${kode}*
+function kirimAjakanGrup() {
+  const link = document.getElementById('resultGroupLink').value.trim();
+  if (!link) { alert('Link grup WA belum diisi!'); return; }
+  const { nama, wa } = currentPesertaData;
+  const msg = `Halo *${nama}* 👋\n\nJangan lupa bergabung ke grup WA belajar & info tryout *Kerja Jadi ASN* ya! 🎓\n\n📲 *Link Grup WA:*\n${link}\n\n*Keuntungan gabung grup:*\n✅ Info jadwal tryout gratis *Rabu & Sabtu*\n✅ Tips & trik mengerjakan soal SKD\n✅ Update seputar CPNS 2026\n✅ Diskusi dengan pejuang ASN lainnya\n\nSampai jumpa di grup! 🚀\n\n~ Tim Kerja Jadi ASN`;
+  const waNum = wa.replace(/\D/g,'').replace(/^0/, '62');
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
 
-Login di: ${location.origin}/login.html
+  // Update groupLink di peserta
+  if (currentPesertaData.kode) {
+    db.collection('peserta').doc(currentPesertaData.kode).update({ groupLink: link }).catch(()=>{});
+  }
+}
 
-Terima kasih telah bergabung!`;
+function resendKonfirmasi(kode, nama, wa) {
+  currentPesertaData = { kode, nama, wa };
+  kirimKonfirmasi();
+}
+
+function resendAjakan(kode, nama, wa, groupLink) {
+  if (!groupLink) {
+    groupLink = prompt('Masukkan link grup WA:', savedGroupLink);
+    if (!groupLink) return;
+  }
+  currentPesertaData = { kode, nama, wa, groupLink };
+  const msg = `Halo *${nama}* 👋\n\nJangan lupa bergabung ke grup WA belajar & info tryout *Kerja Jadi ASN* ya! 🎓\n\n📲 *Link Grup WA:*\n${groupLink}\n\n*Keuntungan gabung grup:*\n✅ Info jadwal tryout gratis *Rabu & Sabtu*\n✅ Tips & trik mengerjakan soal SKD\n✅ Update seputar CPNS 2026\n✅ Diskusi dengan pejuang ASN lainnya\n\nSampai jumpa di grup! 🚀\n\n~ Tim Kerja Jadi ASN`;
   const waNum = wa.replace(/\D/g,'').replace(/^0/, '62');
   window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
 }
@@ -471,7 +560,7 @@ async function hapusPeserta(kode) {
   loadPeserta();
 }
 
-// ==================== PENDAFTAR ====================
+// ============ PENDAFTAR ============
 async function loadPendaftar() {
   const box = document.getElementById('pendaftarList');
   box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
@@ -482,14 +571,15 @@ async function loadPendaftar() {
   if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada pendaftar.</p>'; return; }
 
   box.innerHTML = list.map(p => `
-    <div class="border rounded-xl p-3 flex justify-between items-center">
+    <div class="border rounded-xl p-3 flex flex-wrap justify-between items-center gap-2">
       <div>
         <p class="font-bold text-sm">${p.nama}</p>
         <p class="text-xs text-slate-500">WA: ${p.wa} · Paket ${p.paket}</p>
         <span class="text-xs px-2 py-0.5 rounded-full ${p.status==='pending'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}">${p.status}</span>
+        ${p.kode?`<span class="text-xs font-mono text-slate-500 ml-2">${p.kode}</span>`:''}
       </div>
       ${p.status==='pending'?`
-        <button onclick="approvePendaftar('${p.id}','${p.nama}','${p.wa}','${p.paket}')" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-700">
+        <button onclick="approvePendaftar('${p.id}','${p.nama.replace(/'/g,"\\'")}','${p.wa}','${p.paket}')" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-700">
           <i class="fa-solid fa-check mr-1"></i>Approve & Buat Kode
         </button>`:''}
     </div>
@@ -500,26 +590,35 @@ async function approvePendaftar(id, nama, wa, paket) {
   const kode = KJ.genCode();
   const expired = paket === 'gratis' ? null : new Date(Date.now() + 365*24*60*60*1000);
 
+  await loadGroupLinkSetting();
   await db.collection('peserta').doc(kode).set({
     kode, nama, wa, paket, aktif: true, expired,
+    groupLink: savedGroupLink,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
   await db.collection('pendaftar').doc(id).update({status: 'approved', kode});
 
-  waKode(kode, nama, wa);
-  alert('✅ Kode dibuat: ' + kode);
-  loadPendaftar();
-  loadOverview();
+  // Show result modal untuk kirim WA
+  currentPesertaData = { kode, nama, wa, groupLink: savedGroupLink };
+  document.getElementById('resultNama').textContent = nama;
+  document.getElementById('resultKode').textContent = kode;
+  document.getElementById('resultGroupLink').value = savedGroupLink;
+  document.getElementById('step1Form').classList.add('hidden');
+  document.getElementById('step2Result').classList.remove('hidden');
+  document.getElementById('modalPeserta').classList.remove('hidden');
+  document.getElementById('modalPeserta').classList.add('flex');
+
+  loadPendaftar(); loadOverview();
 }
 
-// ==================== TRYOUT ADMIN ====================
+// ============ TRYOUT ADMIN ============
 async function loadTryoutAdmin() {
   const box = document.getElementById('tryoutAdminList');
   box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
   const snap = await db.collection('tryout').orderBy('urutan').get();
   const list = [];
   snap.forEach(d => list.push({id: d.id, ...d.data()}));
-  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada tryout. Tambahkan dulu.</p>'; return; }
+  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada tryout.</p>'; return; }
 
   box.innerHTML = list.map(t => `
     <div class="border rounded-xl p-3 flex justify-between items-center">
@@ -535,16 +634,8 @@ async function loadTryoutAdmin() {
   `).join('');
 }
 
-async function toggleTryoutAktif(id, cur) {
-  await db.collection('tryout').doc(id).update({aktif: !cur});
-  loadTryoutAdmin();
-}
-
-async function deleteTryout(id) {
-  if (!confirm('Hapus tryout ini? (Soal terkait tidak akan terhapus otomatis)')) return;
-  await db.collection('tryout').doc(id).delete();
-  loadTryoutAdmin();
-}
+async function toggleTryoutAktif(id, cur) { await db.collection('tryout').doc(id).update({aktif: !cur}); loadTryoutAdmin(); }
+async function deleteTryout(id) { if (!confirm('Hapus tryout ini?')) return; await db.collection('tryout').doc(id).delete(); loadTryoutAdmin(); }
 
 function showAddTryout() {
   document.getElementById('tNama').value = '';
@@ -568,8 +659,7 @@ async function saveTryout() {
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
   closeModal('modalTryout');
-  loadTryoutAdmin();
-  loadTryoutDropdown();
+  loadTryoutAdmin(); loadTryoutDropdown();
 }
 
 function closeModal(id) {
