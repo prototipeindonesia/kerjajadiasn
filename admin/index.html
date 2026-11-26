@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Kerja Jadi ASN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:'Plus Jakarta Sans',sans-serif}</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<!-- LOGIN VIEW -->
+<div id="loginView" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-3"><i class="fa-solid fa-user-shield text-white text-2xl"></i></div>
+      <h1 class="text-2xl font-extrabold text-slate-800">Admin Panel</h1>
+      <p class="text-slate-500 text-sm">Kerja Jadi ASN</p>
+    </div>
+    <form id="adminLogin" class="bg-white rounded-3xl shadow-2xl p-8 space-y-4">
+      <div>
+        <label class="block text-sm font-bold mb-1">Email</label>
+        <input required id="admEmail" type="email" class="w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="block text-sm font-bold mb-1">Password</label>
+        <input required id="admPass" type="password" class="w-full px-4 py-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700">Masuk</button>
+      <p class="text-xs text-center text-slate-400">Hanya untuk admin terdaftar</p>
+    </form>
+  </div>
+</div>
+
+<!-- DASHBOARD VIEW -->
+<div id="dashView" class="hidden min-h-screen">
+  <nav class="bg-white border-b shadow-sm sticky top-0 z-30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-shield-halved text-white"></i></div>
+        <span class="font-extrabold text-blue-600">ADMIN <span class="text-yellow-500">KJA</span></span>
+      </div>
+      <button onclick="adminLogout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-100"><i class="fa-solid fa-power-off"></i></button>
+    </div>
+  </nav>
+
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <!-- TABS -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <button onclick="showTab('overview')" id="tab-overview" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white"><i class="fa-solid fa-chart-pie mr-2"></i>Overview</button>
+      <button onclick="showTab('soal')" id="tab-soal" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-list mr-2"></i>Kelola Soal</button>
+      <button onclick="showTab('peserta')" id="tab-peserta" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-users mr-2"></i>Peserta</button>
+      <button onclick="showTab('pendaftar')" id="tab-pendaftar" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-user-plus mr-2"></i>Pendaftar</button>
+      <button onclick="showTab('tryout')" id="tab-tryout" class="tabBtn px-5 py-2.5 rounded-xl font-bold text-sm bg-white text-slate-700"><i class="fa-solid fa-list-check mr-2"></i>Tryout</button>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div id="panel-overview" class="tabPanel">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Total Peserta</div><div id="ovPeserta" class="text-3xl font-black text-blue-600">-</div></div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Total Soal</div><div id="ovSoal" class="text-3xl font-black text-purple-600">-</div></div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Pending Daftar</div><div id="ovPending" class="text-3xl font-black text-yellow-600">-</div></div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Total Hasil</div><div id="ovHasil" class="text-3xl font-black text-green-600">-</div></div>
+      </div>
+    </div>
+
+    <!-- SOAL TAB -->
+    <div id="panel-soal" class="tabPanel hidden">
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-5">
+          <h2 class="font-bold text-xl"><i class="fa-solid fa-list text-purple-600 mr-2"></i>Bank Soal</h2>
+          <div class="flex gap-2">
+            <select id="filterTryoutSoal" onchange="loadSoal()" class="px-3 py-2 rounded-lg border text-sm"></select>
+            <button onclick="downloadTemplate()" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-200"><i class="fa-solid fa-download mr-1"></i>Template Excel</button>
+            <button onclick="document.getElementById('fileExcel').click()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700"><i class="fa-solid fa-file-excel mr-1"></i>Import Excel</button>
+            <input type="file" id="fileExcel" accept=".xlsx,.xls" class="hidden" onchange="importExcel(event)">
+          </div>
+        </div>
+        <div id="soalList" class="space-y-2 max-h-[600px] overflow-y-auto">
+          <p class="text-center text-slate-400 py-4">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESERTA TAB -->
+    <div id="panel-peserta" class="tabPanel hidden">
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-center mb-5">
+          <h2 class="font-bold text-xl"><i class="fa-solid fa-users text-blue-600 mr-2"></i>Peserta Aktif</h2>
+          <button onclick="showAddPeserta()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-blue-700"><i class="fa-solid fa-plus mr-1"></i>Buat Kode</button>
+        </div>
+        <div id="pesertaList" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <!-- PENDAFTAR TAB -->
+    <div id="panel-pendaftar" class="tabPanel hidden">
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h2 class="font-bold text-xl mb-4"><i class="fa-solid fa-user-plus text-yellow-600 mr-2"></i>Pendaftar Baru</h2>
+        <div id="pendaftarList" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
+      </div>
+    </div>
+
+    <!-- TRYOUT TAB -->
+    <div id="panel-tryout" class="tabPanel hidden">
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-center mb-5">
+          <h2 class="font-bold text-xl"><i class="fa-solid fa-list-check text-green-600 mr-2"></i>Konfigurasi Tryout</h2>
+          <button onclick="showAddTryout()" class="bg-green-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-700"><i class="fa-solid fa-plus mr-1"></i>Tambah Tryout</button>
+        </div>
+        <div id="tryoutAdminList" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Buat Peserta -->
+<div id="modalPeserta" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <h3 class="text-xl font-bold mb-4">Buat Kode Peserta</h3>
+    <div class="space-y-3">
+      <input id="pNama" placeholder="Nama" class="w-full px-4 py-2.5 rounded-lg border">
+      <input id="pWa" placeholder="Nomor WA" class="w-full px-4 py-2.5 rounded-lg border">
+      <select id="pPaket" class="w-full px-4 py-2.5 rounded-lg border">
+        <option value="1">Paket 1 - Standard</option>
+        <option value="2">Paket 2 - Sukses</option>
+        <option value="3">Paket 3 - Master</option>
+        <option value="gratis">Tryout Gratis</option>
+      </select>
+      <div class="bg-blue-50 rounded-lg p-3">
+        <p class="text-xs font-bold text-blue-700 mb-1">Kode Akses (otomatis):</p>
+        <p id="previewKode" class="font-mono font-bold text-lg text-blue-800"></p>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="closeModal('modalPeserta')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
+      <button onclick="savePeserta()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold">Simpan & Kirim WA</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Tryout -->
+<div id="modalTryout" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <h3 class="text-xl font-bold mb-4">Tambah / Edit Tryout</h3>
+    <div class="space-y-3">
+      <input id="tNama" placeholder="Nama Tryout" class="w-full px-4 py-2.5 rounded-lg border">
+      <select id="tTipe" class="w-full px-4 py-2.5 rounded-lg border">
+        <option value="premium">Premium</option>
+        <option value="gratis">Gratis (Sabtu)</option>
+      </select>
+      <select id="tPaket" class="w-full px-4 py-2.5 rounded-lg border">
+        <option value="1">Paket 1</option>
+        <option value="2">Paket 2</option>
+        <option value="3">Paket 3</option>
+      </select>
+      <input id="tUrutan" type="number" placeholder="Urutan" value="1" class="w-full px-4 py-2.5 rounded-lg border">
+      <div class="grid grid-cols-3 gap-2">
+        <input id="tTwk" type="number" placeholder="TWK" value="30" class="px-3 py-2 rounded-lg border text-sm">
+        <input id="tTiu" type="number" placeholder="TIU" value="35" class="px-3 py-2 rounded-lg border text-sm">
+        <input id="tTkp" type="number" placeholder="TKP" value="45" class="px-3 py-2 rounded-lg border text-sm">
+      </div>
+      <input id="tWaktu" type="number" placeholder="Waktu (menit)" value="100" class="w-full px-4 py-2.5 rounded-lg border">
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="closeModal('modalTryout')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
+      <button onclick="saveTryout()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+<script>
+let isAdmin = false;
+let currentTab = 'overview';
+let selectedKodePreview = '';
+
+// ==================== AUTH ====================
+document.getElementById('adminLogin').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = e.target.querySelector('button');
+  btn.disabled = true; btn.textContent = 'Memeriksa...';
+  try {
+    await auth.signInWithEmailAndPassword(
+      document.getElementById('admEmail').value,
+      document.getElementById('admPass').value
+    );
+    const uid = auth.currentUser.uid;
+    const adminDoc = await db.collection('admins').doc(uid).get();
+    if (!adminDoc.exists) {
+      await auth.signOut();
+      throw new Error('Akun ini bukan admin. Tambahkan UID Anda ke collection "admins".');
+    }
+    isAdmin = true;
+    showDash();
+  } catch (err) {
+    alert('Login gagal: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Masuk';
+  }
+});
+
+auth.onAuthStateChanged(async (user) => {
+  if (user && !user.isAnonymous) {
+    const doc = await db.collection('admins').doc(user.uid).get();
+    if (doc.exists) { isAdmin = true; showDash(); }
+  }
+});
+
+function showDash() {
+  document.getElementById('loginView').classList.add('hidden');
+  document.getElementById('dashView').classList.remove('hidden');
+  loadOverview();
+  loadTryoutDropdown();
+}
+
+function adminLogout() {
+  if (confirm('Keluar dari admin panel?')) auth.signOut().then(() => location.reload());
+}
+
+// ==================== TABS ====================
+function showTab(name) {
+  currentTab = name;
+  document.querySelectorAll('.tabPanel').forEach(p => p.classList.add('hidden'));
+  document.getElementById('panel-' + name).classList.remove('hidden');
+  document.querySelectorAll('.tabBtn').forEach(b => {
+    b.classList.remove('bg-blue-600', 'text-white');
+    b.classList.add('bg-white', 'text-slate-700');
+  });
+  const activeBtn = document.getElementById('tab-' + name);
+  activeBtn.classList.remove('bg-white', 'text-slate-700');
+  activeBtn.classList.add('bg-blue-600', 'text-white');
+
+  if (name === 'overview') loadOverview();
+  if (name === 'soal') loadSoal();
+  if (name === 'peserta') loadPeserta();
+  if (name === 'pendaftar') loadPendaftar();
+  if (name === 'tryout') loadTryoutAdmin();
+}
+
+// ==================== OVERVIEW ====================
+async function loadOverview() {
+  try {
+    const [pesertaSnap, soalSnap, pendaftarSnap, hasilSnap] = await Promise.all([
+      db.collection('peserta').get(),
+      db.collection('soal').get(),
+      db.collection('pendaftar').where('status','==','pending').get(),
+      db.collection('hasil').get()
+    ]);
+    document.getElementById('ovPeserta').textContent = pesertaSnap.size;
+    document.getElementById('ovSoal').textContent = soalSnap.size;
+    document.getElementById('ovPending').textContent = pendaftarSnap.size;
+    document.getElementById('ovHasil').textContent = hasilSnap.size;
+  } catch (e) { console.error(e); }
+}
+
+// ==================== TRYOUT DROPDOWN ====================
+async function loadTryoutDropdown() {
+  const snap = await db.collection('tryout').get();
+  const sel = document.getElementById('filterTryoutSoal');
+  sel.innerHTML = '<option value="">-- Pilih Tryout --</option>';
+  snap.forEach(d => {
+    sel.innerHTML += `<option value="${d.id}">${d.data().nama}</option>`;
+  });
+}
+
+// ==================== SOAL ====================
+async function loadSoal() {
+  const tryoutId = document.getElementById('filterTryoutSoal').value;
+  const box = document.getElementById('soalList');
+  if (!tryoutId) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Pilih tryout dulu</p>'; return; }
+  box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
+
+  const snap = await db.collection('soal').where('tryoutId', '==', tryoutId).get();
+  const list = [];
+  snap.forEach(d => list.push({id: d.id, ...d.data()}));
+  list.sort((a,b) => a.nomor - b.nomor);
+
+  if (list.length === 0) {
+    box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada soal. Import dari Excel.</p>';
+    return;
+  }
+
+  box.innerHTML = list.map(s => `
+    <div class="border rounded-xl p-3 hover:bg-slate-50">
+      <div class="flex justify-between items-start gap-2">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-bold px-2 py-0.5 rounded ${s.kategori==='TWK'?'bg-blue-100 text-blue-700':s.kategori==='TIU'?'bg-yellow-100 text-yellow-700':'bg-purple-100 text-purple-700'}">${s.kategori}</span>
+            <span class="text-xs text-slate-400">No. ${s.nomor}</span>
+          </div>
+          <p class="text-sm font-medium text-slate-800 line-clamp-2">${s.pertanyaan}</p>
+          <p class="text-xs text-slate-500 mt-1">Jawaban: <strong>${s.jawabanBenar||'-'}</strong></p>
+        </div>
+        <button onclick="hapusSoal('${s.id}')" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function hapusSoal(id) {
+  if (!confirm('Hapus soal ini?')) return;
+  await db.collection('soal').doc(id).delete();
+  loadSoal();
+}
+
+// ==================== EXCEL IMPORT ====================
+function downloadTemplate() {
+  const data = [
+    ['kategori','pertanyaan','pilihan_a','pilihan_b','pilihan_c','pilihan_d','pilihan_e','jawaban_benar','pembahasan','skor_a','skor_b','skor_c','skor_d','skor_e'],
+    ['TWK','Contoh soal TWK...','Pilihan A','Pilihan B','Pilihan C','Pilihan D','Pilihan E','A','Pembahasan...','','','','',''],
+    ['TIU','Contoh soal TIU...','Pilihan A','Pilihan B','Pilihan C','Pilihan D','Pilihan E','B','Pembahasan...','','','','',''],
+    ['TKP','Contoh soal TKP...','Pilihan A','Pilihan B','Pilihan C','Pilihan D','Pilihan E','','Pembahasan...',1,2,3,4,5]
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Soal');
+  XLSX.writeFile(wb, 'template-soal-kja.xlsx');
+}
+
+async function importExcel(e) {
+  const tryoutId = document.getElementById('filterTryoutSoal').value;
+  if (!tryoutId) { alert('Pilih tryout dulu!'); e.target.value=''; return; }
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (evt) => {
+    try {
+      const wb = XLSX.read(evt.target.result, {type:'binary'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws);
+
+      if (rows.length === 0) throw new Error('File kosong');
+
+      // Hitung nomor urut awal
+      const existing = await db.collection('soal').where('tryoutId','==',tryoutId).get();
+      let nomor = existing.size + 1;
+
+      const batch = db.batch();
+      let count = 0;
+
+      for (const r of rows) {
+        if (!r.pertanyaan || !r.kategori) continue;
+        const ref = db.collection('soal').doc();
+        const data = {
+          tryoutId,
+          nomor: nomor++,
+          kategori: String(r.kategori).toUpperCase().trim(),
+          pertanyaan: String(r.pertanyaan).trim(),
+          pilihan: {
+            a: String(r.pilihan_a||'').trim(),
+            b: String(r.pilihan_b||'').trim(),
+            c: String(r.pilihan_c||'').trim(),
+            d: String(r.pilihan_d||'').trim(),
+            e: String(r.pilihan_e||'').trim()
+          },
+          jawabanBenar: String(r.jawaban_benar||'').toUpperCase().trim(),
+          pembahasan: String(r.pembahasan||'').trim(),
+          skor: {
+            a: Number(r.skor_a)||0, b: Number(r.skor_b)||0, c: Number(r.skor_c)||0,
+            d: Number(r.skor_d)||0, e: Number(r.skor_e)||0
+          },
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        batch.set(ref, data);
+        count++;
+      }
+
+      await batch.commit();
+      alert(`✅ Berhasil import ${count} soal!`);
+      loadSoal();
+      loadOverview();
+    } catch (err) {
+      alert('Gagal import: ' + err.message);
+    } finally {
+      e.target.value = '';
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+// ==================== PESERTA ====================
+async function loadPeserta() {
+  const box = document.getElementById('pesertaList');
+  box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
+  const snap = await db.collection('peserta').get();
+  const list = [];
+  snap.forEach(d => list.push({id: d.id, ...d.data()}));
+  list.sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+
+  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada peserta.</p>'; return; }
+
+  box.innerHTML = list.map(p => `
+    <div class="border rounded-xl p-3 flex justify-between items-center gap-3">
+      <div class="flex-1 min-w-0">
+        <p class="font-bold text-sm">${p.nama || '-'}</p>
+        <p class="text-xs text-slate-500 font-mono">${p.kode}</p>
+        <p class="text-xs text-slate-400">Paket ${p.paket} · WA: ${p.wa||'-'}</p>
+      </div>
+      <div class="flex items-center gap-1">
+        <button onclick="waKode('${p.kode}','${p.nama||''}','${p.wa||''}')" class="text-green-600 hover:bg-green-50 p-2 rounded-lg"><i class="fa-brands fa-whatsapp"></i></button>
+        <button onclick="toggleAktif('${p.kode}', ${p.aktif})" class="text-${p.aktif?'green':'red'}-600 hover:bg-${p.aktif?'green':'red'}-50 p-2 rounded-lg">
+          <i class="fa-solid fa-${p.aktif?'toggle-on':'toggle-off'}"></i>
+        </button>
+        <button onclick="hapusPeserta('${p.kode}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function showAddPeserta() {
+  const kode = KJ.genCode();
+  selectedKodePreview = kode;
+  document.getElementById('previewKode').textContent = kode;
+  document.getElementById('pNama').value = '';
+  document.getElementById('pWa').value = '';
+  document.getElementById('modalPeserta').classList.remove('hidden');
+  document.getElementById('modalPeserta').classList.add('flex');
+}
+
+async function savePeserta() {
+  const nama = document.getElementById('pNama').value.trim();
+  const wa = document.getElementById('pWa').value.trim();
+  const paket = document.getElementById('pPaket').value;
+  if (!nama) { alert('Nama wajib diisi'); return; }
+
+  const kode = selectedKodePreview;
+  const expired = paket === 'gratis' ? null : new Date(Date.now() + 365*24*60*60*1000);
+
+  await db.collection('peserta').doc(kode).set({
+    kode, nama, wa, paket,
+    aktif: true,
+    expired: expired,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+
+  closeModal('modalPeserta');
+  waKode(kode, nama, wa);
+  loadPeserta();
+  loadOverview();
+}
+
+function waKode(kode, nama, wa) {
+  const msg = `Halo ${nama}, berikut kode akses Kerja Jadi ASN Anda:
+
+🔑 *KODE: ${kode}*
+
+Login di: ${location.origin}/login.html
+
+Terima kasih telah bergabung!`;
+  const waNum = wa.replace(/\D/g,'').replace(/^0/, '62');
+  window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+async function toggleAktif(kode, current) {
+  await db.collection('peserta').doc(kode).update({ aktif: !current });
+  loadPeserta();
+}
+
+async function hapusPeserta(kode) {
+  if (!confirm(`Hapus peserta ${kode}?`)) return;
+  await db.collection('peserta').doc(kode).delete();
+  loadPeserta();
+}
+
+// ==================== PENDAFTAR ====================
+async function loadPendaftar() {
+  const box = document.getElementById('pendaftarList');
+  box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
+  const snap = await db.collection('pendaftar').orderBy('createdAt','desc').get();
+  const list = [];
+  snap.forEach(d => list.push({id: d.id, ...d.data()}));
+
+  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada pendaftar.</p>'; return; }
+
+  box.innerHTML = list.map(p => `
+    <div class="border rounded-xl p-3 flex justify-between items-center">
+      <div>
+        <p class="font-bold text-sm">${p.nama}</p>
+        <p class="text-xs text-slate-500">WA: ${p.wa} · Paket ${p.paket}</p>
+        <span class="text-xs px-2 py-0.5 rounded-full ${p.status==='pending'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}">${p.status}</span>
+      </div>
+      ${p.status==='pending'?`
+        <button onclick="approvePendaftar('${p.id}','${p.nama}','${p.wa}','${p.paket}')" class="bg-green-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-700">
+          <i class="fa-solid fa-check mr-1"></i>Approve & Buat Kode
+        </button>`:''}
+    </div>
+  `).join('');
+}
+
+async function approvePendaftar(id, nama, wa, paket) {
+  const kode = KJ.genCode();
+  const expired = paket === 'gratis' ? null : new Date(Date.now() + 365*24*60*60*1000);
+
+  await db.collection('peserta').doc(kode).set({
+    kode, nama, wa, paket, aktif: true, expired,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  await db.collection('pendaftar').doc(id).update({status: 'approved', kode});
+
+  waKode(kode, nama, wa);
+  alert('✅ Kode dibuat: ' + kode);
+  loadPendaftar();
+  loadOverview();
+}
+
+// ==================== TRYOUT ADMIN ====================
+async function loadTryoutAdmin() {
+  const box = document.getElementById('tryoutAdminList');
+  box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
+  const snap = await db.collection('tryout').orderBy('urutan').get();
+  const list = [];
+  snap.forEach(d => list.push({id: d.id, ...d.data()}));
+  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada tryout. Tambahkan dulu.</p>'; return; }
+
+  box.innerHTML = list.map(t => `
+    <div class="border rounded-xl p-3 flex justify-between items-center">
+      <div>
+        <p class="font-bold text-sm">${t.nama}</p>
+        <p class="text-xs text-slate-500">${t.tipe} · Paket ${t.paket} · ${t.twk||30}TWK/${t.tiu||35}TIU/${t.tkp||45}TKP · ${t.waktuMenit||100}m</p>
+      </div>
+      <div class="flex gap-1">
+        <button onclick="toggleTryoutAktif('${t.id}', ${t.aktif})" class="text-${t.aktif?'green':'red'}-600 p-2 hover:bg-slate-100 rounded"><i class="fa-solid fa-${t.aktif?'toggle-on':'toggle-off'}"></i></button>
+        <button onclick="deleteTryout('${t.id}')" class="text-red-500 p-2 hover:bg-red-50 rounded"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function toggleTryoutAktif(id, cur) {
+  await db.collection('tryout').doc(id).update({aktif: !cur});
+  loadTryoutAdmin();
+}
+
+async function deleteTryout(id) {
+  if (!confirm('Hapus tryout ini? (Soal terkait tidak akan terhapus otomatis)')) return;
+  await db.collection('tryout').doc(id).delete();
+  loadTryoutAdmin();
+}
+
+function showAddTryout() {
+  document.getElementById('tNama').value = '';
+  document.getElementById('modalTryout').classList.remove('hidden');
+  document.getElementById('modalTryout').classList.add('flex');
+}
+
+async function saveTryout() {
+  const nama = document.getElementById('tNama').value.trim();
+  if (!nama) { alert('Nama wajib diisi'); return; }
+  await db.collection('tryout').add({
+    nama,
+    tipe: document.getElementById('tTipe').value,
+    paket: document.getElementById('tPaket').value,
+    urutan: Number(document.getElementById('tUrutan').value)||1,
+    twk: Number(document.getElementById('tTwk').value)||30,
+    tiu: Number(document.getElementById('tTiu').value)||35,
+    tkp: Number(document.getElementById('tTkp').value)||45,
+    waktuMenit: Number(document.getElementById('tWaktu').value)||100,
+    aktif: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  closeModal('modalTryout');
+  loadTryoutAdmin();
+  loadTryoutDropdown();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+  document.getElementById(id).classList.remove('flex');
+}
+</script>
+</body>
+</html>
