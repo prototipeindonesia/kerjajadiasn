@@ -1,11 +1,11 @@
 // GANTI dengan konfigurasi Firebase Anda (Console → Project Settings)
 const firebaseConfig = {
-  apiKey: "GANTI_API_KEY",
-  authDomain: "GANTI_PROJECT.firebaseapp.com",
-  projectId: "GANTI_PROJECT_ID",
-  storageBucket: "GANTI_PROJECT.appspot.com",
-  messagingSenderId: "GANTI_SENDER_ID",
-  appId: "GANTI_APP_ID"
+  apiKey: "AIzaSyDkCa6hMHj0-PG6_b-ZVXiCCs7xAnqjMDY",
+  authDomain: "kerjajadiasn-23c10.firebaseapp.com",
+  projectId: "kerjajadiasn-23c10",
+  storageBucket: "kerjajadiasn-23c10.firebasestorage.app",
+  messagingSenderId: "438320778659",
+  appId: "1:438320778659:web:52625d76f08d27a120de16"
 };
 
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
