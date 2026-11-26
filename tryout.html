@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tryout — Kerja Jadi ASN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:'Plus Jakarta Sans',sans-serif}</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+  <nav class="bg-white border-b shadow-sm sticky top-0 z-30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <h1 class="font-bold text-slate-800"><i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i><span id="namaTryout">Tryout</span></h1>
+      <div class="flex items-center gap-3">
+        <div id="timerBox" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-mono font-bold text-lg">--:--:--</div>
+        <button onclick="confirmSubmit()" class="bg-green-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-green-700"><i class="fa-solid fa-paper-plane"></i> Selesai</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-6 max-w-6xl">
+    <div class="grid md:grid-cols-4 gap-6">
+      <div class="md:col-span-3">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <div id="kategoriBadge" class="inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-blue-600">TWK</div>
+              <div class="text-xs text-slate-500 mt-2">Soal <span id="nomorSoal">1</span> dari <span id="totalSoal">0</span></div>
+            </div>
+            <button onclick="toggleRagu()" id="btnRagu" class="text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-yellow-100 text-slate-600 font-bold">
+              <i class="fa-regular fa-bookmark"></i> Ragu
+            </button>
+          </div>
+
+          <div id="pertanyaan" class="text-slate-800 text-lg leading-relaxed mb-6 font-medium">Memuat soal...</div>
+
+          <div id="pilihan" class="space-y-3"></div>
+        </div>
+
+        <div class="flex justify-between mt-4">
+          <button onclick="prevSoal()" id="btnPrev" class="bg-white border px-6 py-3 rounded-xl font-bold hover:bg-slate-50"><i class="fa-solid fa-chevron-left mr-2"></i> Sebelumnya</button>
+          <button onclick="nextSoal()" id="btnNext" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700">Selanjutnya <i class="fa-solid fa-chevron-right ml-2"></i></button>
+        </div>
+      </div>
+
+      <div class="md:col-span-1">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border sticky top-24">
+          <h3 class="font-bold mb-3 text-sm">Navigasi Soal</h3>
+          <div id="navGrid" class="grid grid-cols-5 gap-1.5 mb-4"></div>
+          <div class="text-xs space-y-1.5">
+            <div class="flex items-center gap-2"><div class="w-4 h-4 bg-blue-600 rounded"></div> Dijawab</div>
+            <div class="flex items-center gap-2"><div class="w-4 h-4 bg-yellow-400 rounded"></div> Ragu-ragu</div>
+            <div class="flex items-center gap-2"><div class="w-4 h-4 bg-slate-200 rounded"></div> Belum</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const tryoutId = params.get('id');
+    const sess = KJ.getSession();
+
+    let soalList = [];
+    let jawaban = {}; // {soalId: 'A'|'B'...}
+    let ragu = new Set();
+    let current = 0;
+    let durasiDetik = 100 * 60;
+    let startTime = Date.now();
+    let timerInterval;
+
+    if (!sess) { alert('Silakan login dulu'); location.href = 'login.html'; }
+    if (!tryoutId) { alert('Tryout tidak ditemukan'); location.href = 'dashboard.html'; }
+
+    async function init() {
+      try {
+        if (!auth.currentUser) await auth.signInAnonymously();
+
+        // Load tryout config
+        const tr = await db.collection('tryout').doc(tryoutId).get();
+        if (!tr.exists) throw new Error('Tryout tidak ditemukan');
+        const tryout = tr.data();
+        document.getElementById('namaTryout').textContent = tryout.nama;
+        durasiDetik = (tryout.waktuMenit || 100) * 60;
+
+        // Load soal
+        const snap = await db.collection('soal').where('tryoutId', '==', tryoutId).get();
+        snap.forEach(d => soalList.push({id: d.id, ...d.data()}));
+        soalList.sort((a,b) => a.nomor - b.nomor);
+
+        if (soalList.length === 0) throw new Error('Belum ada soal untuk tryout ini');
+        document.getElementById('totalSoal').textContent = soalList.length;
+
+        startTimer();
+        renderSoal();
+        renderNav();
+      } catch (e) {
+        alert('Error: ' + e.message);
+        location.href = 'dashboard.html';
+      }
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const sisa = durasiDetik - elapsed;
+        if (sisa <= 0) { clearInterval(timerInterval); doSubmit(true); return; }
+        const h = String(Math.floor(sisa/3600)).padStart(2,'0');
+        const m = String(Math.floor((sisa%3600)/60)).padStart(2,'0');
+        const s = String(sisa%60).padStart(2,'0');
+        document.getElementById('timerBox').textContent = `${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    function renderSoal() {
+      const s = soalList[current];
+      const kat = s.kategori || 'TWK';
+      const badge = document.getElementById('kategoriBadge');
+      badge.textContent = kat;
+      badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold text-white ' + 
+        (kat==='TWK'?'bg-blue-600':kat==='TIU'?'bg-yellow-500':'bg-purple-600');
+
+      document.getElementById('nomorSoal').textContent = current + 1;
+      document.getElementById('pertanyaan').textContent = s.pertanyaan;
+
+      const p = document.getElementById('pilihan');
+      p.innerHTML = '';
+      ['A','B','C','D','E'].forEach(k => {
+        if (!s.pilihan || !s.pilihan[k.toLowerCase()]) return;
+        const dipilih = jawaban[s.id] === k;
+        p.innerHTML += `
+          <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${dipilih?'border-blue-500 bg-blue-50':'border-slate-200 hover:border-blue-300'}">
+            <input type="radio" name="pilihan" value="${k}" ${dipilih?'checked':''} onchange="pilihJawaban('${k}')" class="mt-1">
+            <div class="flex-1"><strong class="text-blue-600 mr-2">${k}.</strong>${s.pilihan[k.toLowerCase()]}</div>
+          </label>`;
+      });
+
+      // Ragu button
+      const btnRagu = document.getElementById('btnRagu');
+      if (ragu.has(s.id)) {
+        btnRagu.className = 'text-sm px-3 py-1.5 rounded-lg bg-yellow-400 text-white font-bold';
+        btnRagu.innerHTML = '<i class="fa-solid fa-bookmark"></i> Ragu';
+      } else {
+        btnRagu.className = 'text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-yellow-100 text-slate-600 font-bold';
+        btnRagu.innerHTML = '<i class="fa-regular fa-bookmark"></i> Ragu';
+      }
+
+      document.getElementById('btnPrev').disabled = current === 0;
+      document.getElementById('btnNext').disabled = current === soalList.length - 1;
+      renderNav();
+    }
+
+    function pilihJawaban(k) {
+      jawaban[soalList[current].id] = k;
+      renderSoal();
+    }
+
+    function toggleRagu() {
+      const id = soalList[current].id;
+      if (ragu.has(id)) ragu.delete(id); else ragu.add(id);
+      renderSoal();
+    }
+
+    function prevSoal() { if (current > 0) { current--; renderSoal(); } }
+    function nextSoal() { if (current < soalList.length - 1) { current++; renderSoal(); } }
+
+    function renderNav() {
+      const g = document.getElementById('navGrid');
+      g.innerHTML = '';
+      soalList.forEach((s, i) => {
+        let cls = 'bg-slate-200 text-slate-700';
+        if (jawaban[s.id]) cls = 'bg-blue-600 text-white';
+        if (ragu.has(s.id)) cls = 'bg-yellow-400 text-white';
+        if (i === current) cls += ' ring-2 ring-blue-400';
+        g.innerHTML += `<button onclick="gotoSoal(${i})" class="w-full aspect-square rounded text-xs font-bold ${cls} hover:opacity-80">${i+1}</button>`;
+      });
+    }
+
+    function gotoSoal(i) { current = i; renderSoal(); }
+
+    function confirmSubmit() {
+      const belum = soalList.length - Object.keys(jawaban).length;
+      if (belum > 0 && !confirm(`Masih ada ${belum} soal belum dijawab. Yakin ingin selesai?`)) return;
+      doSubmit(false);
+    }
+
+    async function doSubmit(auto) {
+      if (!auto && !confirm('Kirim jawaban dan lihat hasil?')) return;
+      clearInterval(timerInterval);
+      try {
+        // Hitung skor
+        let twk = 0, tiu = 0, tkp = 0;
+        let benarTWK = 0, benarTIU = 0;
+        soalList.forEach(s => {
+          const jw = jawaban[s.id];
+          if (!jw) return;
+          const kat = s.kategori;
+          if (kat === 'TWK' || kat === 'TIU') {
+            if (jw === s.jawabanBenar) {
+              if (kat === 'TWK') { twk += 5; benarTWK++; }
+              if (kat === 'TIU') { tiu += 5; benarTIU++; }
+            }
+          } else if (kat === 'TKP') {
+            const skor = (s.skor && s.skor[jw.toLowerCase()]) || 0;
+            tkp += skor;
+          }
+        });
+        const total = twk + tiu + tkp;
+        const lulus = twk >= 65 && tiu >= 80 && tkp >= 166 && total >= 311;
+        const waktu = Math.floor((Date.now() - startTime) / 1000);
+
+        const hasilData = {
+          kode: sess.kode,
+          tryoutId,
+          namaTryout: document.getElementById('namaTryout').textContent,
+          twk, tiu, tkp, total, lulus,
+          benarTWK, benarTIU,
+          jawaban,
+          waktuPengerjaan: waktu,
+          tanggal: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        const ref = await db.collection('hasil').add(hasilData);
+        location.href = 'hasil.html?id=' + ref.id;
+      } catch (e) {
+        alert('Gagal menyimpan hasil: ' + e.message);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
