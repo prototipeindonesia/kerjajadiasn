@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kerja Jadi ASN — Platform Tryout CPNS</title>
+  <title>Kerja Jadi ASN — Platform Tryout CPNS Terbaik</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -11,17 +11,16 @@
 </head>
 <body class="bg-slate-50 text-slate-800">
 
-  <!-- TOP BANNER -->
-  <div class="bg-green-600 text-white py-2.5 px-4 text-center text-sm font-bold">
-    🎁 Tryout Gratis Setiap Hari Sabtu! <a href="tryoutgratis.html" class="underline ml-1 hover:text-green-100 italic">Coba Sekarang →</a>
+  <!-- TOP PROMO BANNER -->
+  <div class="bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 text-white py-2.5 px-4 text-center text-xs md:text-sm font-bold">
+    🔥 <strong>FLASH SALE!</strong> Diskon 30% Paket Premium - Berakhir dalam <span id="promoTimer" class="bg-white text-red-600 px-2 py-0.5 rounded font-mono">--:--</span>
+    · <a href="registrasi.html" class="underline ml-1 hover:text-yellow-100">Ambil Sekarang →</a>
   </div>
 
   <!-- NAV -->
   <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-40">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <a href="index.html" class="text-2xl font-extrabold text-blue-600">
-        KERJA JADI <span class="text-yellow-500">ASN</span>
-      </a>
+      <a href="index.html" class="text-2xl font-extrabold text-blue-600">KERJA JADI <span class="text-yellow-500">ASN</span></a>
       <div class="hidden md:flex items-center gap-6">
         <a href="index.html" class="font-semibold hover:text-blue-600">Beranda</a>
         <a href="tryoutgratis.html" class="bg-green-100 text-green-700 px-4 py-1.5 rounded-full font-bold hover:bg-green-200">Tryout Gratis</a>
@@ -44,7 +43,10 @@
       <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 mb-6 leading-tight">
         Cara Cerdas Lolos <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Seleksi ASN</span>
       </h1>
-      <p class="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto">Akses ribuan soal simulasi CAT, materi terbaru, dan ranking nasional. Mulai gratis hari ini!</p>
+      <p class="text-lg md:text-xl text-slate-600 mb-6 max-w-2xl mx-auto">Akses ribuan soal simulasi CAT, materi terbaru, dan ranking nasional. Mulai gratis hari ini!</p>
+      <div class="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full font-bold text-sm mb-8">
+        <i class="fa-solid fa-calendar-check"></i> Tryout Gratis Setiap Rabu & Sabtu
+      </div>
       <div class="flex flex-col sm:flex-row flex-wrap justify-center gap-4 mb-10">
         <a href="tryoutgratis.html" class="bg-slate-900 text-white font-bold py-4 px-8 rounded-2xl shadow-xl hover:bg-slate-800 transition flex items-center justify-center">Mulai TryOut Gratis <i class="fa-solid fa-arrow-right ml-2"></i></a>
         <a href="registrasi.html" class="bg-blue-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:bg-blue-700 transition flex items-center justify-center"><i class="fa-solid fa-crown text-yellow-300 mr-2"></i> Daftar Sekarang</a>
@@ -55,7 +57,7 @@
           <img class="w-8 h-8 rounded-full border-2 border-white bg-green-200" src="https://ui-avatars.com/api/?name=B" alt="">
           <img class="w-8 h-8 rounded-full border-2 border-white bg-yellow-200" src="https://ui-avatars.com/api/?name=C" alt="">
         </div>
-        <span>Bergabung dengan 10,000+ calon peserta</span>
+        <span>Bergabung dengan <strong class="text-slate-700">10,000+</strong> calon peserta</span>
       </div>
     </div>
   </header>
@@ -95,21 +97,78 @@
     </div>
   </section>
 
-  <!-- FREE SATURDAY CTA -->
+  <!-- TESTIMONIALS -->
+  <section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-extrabold mb-3">Kata Mereka yang Sudah Berhasil</h2>
+        <p class="text-slate-600">Cerita sukses para pejuang ASN yang bergabung dengan kami</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+          <div class="flex text-yellow-400 mb-3">★★★★★</div>
+          <p class="text-slate-700 text-sm mb-4 italic">"Soalnya sangat mirip dengan FR! Belajar 2 bulan dengan tryout di sini, akhirnya lolos SKD dengan skor 412. Recommended banget!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">A</div>
+            <div><p class="font-bold text-sm">Anisa R.</p><p class="text-xs text-slate-500">CPNS 2024 - Kemenkeu</p></div>
+          </div>
+        </div>
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+          <div class="flex text-yellow-400 mb-3">★★★★★</div>
+          <p class="text-slate-700 text-sm mb-4 italic">"Fitur analisis statistik sangat membantu! Saya tahu kelemahan di TIU dan bisa fokus latihan di situ. Terima kasih Kerja Jadi ASN!"</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">B</div>
+            <div><p class="font-bold text-sm">Budi S.</p><p class="text-xs text-slate-500">CPNS 2024 - BKN</p></div>
+          </div>
+        </div>
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+          <div class="flex text-yellow-400 mb-3">★★★★★</div>
+          <p class="text-slate-700 text-sm mb-4 italic">"Tryout gratis Rabu-Sabtu sangat worth it! Jadi bisa ukur kemampuan tiap minggu tanpa keluar biaya. Lanjut premium karena puas."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">C</div>
+            <div><p class="font-bold text-sm">Citra D.</p><p class="text-xs text-slate-500">CPNS 2024 - Kemenkumham</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE SATURDAY CTA (Rabu & Sabtu) -->
   <section class="py-20 bg-gradient-to-br from-green-50 to-emerald-50">
     <div class="container mx-auto px-4">
       <div class="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-green-100 flex flex-col md:flex-row items-center gap-10">
         <div class="md:w-3/5">
           <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1.5 rounded-full font-bold text-sm mb-4">
-            <i class="fa-solid fa-calendar-day"></i> Setiap Hari Sabtu
+            <i class="fa-solid fa-calendar-day"></i> Setiap Rabu & Sabtu
           </div>
-          <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Tryout Gratis Setiap Sabtu!</h2>
-          <p class="text-lg text-slate-600">Latihan SKD gratis tanpa biaya sepeser pun. Cukup isi nama & nomor WhatsApp, langsung kerjakan.</p>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Tryout Gratis 2× Seminggu!</h2>
+          <p class="text-lg text-slate-600">Latihan SKD gratis tanpa biaya sepeser pun, setiap hari <strong>Rabu</strong> dan <strong>Sabtu</strong>. Cukup isi nama & nomor WhatsApp, langsung kerjakan.</p>
         </div>
         <div class="md:w-2/5 w-full">
           <a href="tryoutgratis.html" class="bg-green-600 text-white font-extrabold py-5 px-8 rounded-2xl shadow-xl hover:bg-green-700 transition flex items-center justify-center text-lg w-full">
             <i class="fa-solid fa-play mr-3"></i> Ikuti Tryout Gratis
           </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMO PREMIUM -->
+  <section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white text-center relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -translate-y-32 translate-x-32"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500/10 rounded-full translate-y-32 -translate-x-32"></div>
+        <div class="relative z-10">
+          <div class="inline-block bg-red-500 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">🔥 Promo Terbatas</div>
+          <h2 class="text-3xl md:text-4xl font-extrabold mb-4">Siap Lulus CPNS Tahun Ini?</h2>
+          <p class="text-blue-100 mb-8 max-w-2xl mx-auto">Dapatkan akses penuh ke semua paket tryout, materi SKD lengkap, ranking nasional, dan grup belajar eksklusif. Diskon 30% untuk 100 pendaftar pertama!</p>
+          <div class="flex flex-wrap gap-4 justify-center">
+            <a href="registrasi.html" class="bg-yellow-500 text-slate-900 font-extrabold py-4 px-10 rounded-2xl hover:bg-yellow-400 shadow-2xl transition">Ambil Promo Sekarang</a>
+            <a href="https://wa.me/6285696409288?text=Halo%20Admin,%20saya%20ingin%20tanya%20promo%20paket%20premium" target="_blank" class="bg-white/10 backdrop-blur border-2 border-white/30 text-white font-bold py-4 px-10 rounded-2xl hover:bg-white/20">
+              <i class="fa-brands fa-whatsapp mr-2"></i> Tanya Admin
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -126,7 +185,7 @@
         <div>
           <h4 class="font-bold mb-4">Layanan</h4>
           <ul class="text-slate-400 space-y-2 text-sm">
-            <li><a href="tryoutgratis.html" class="hover:text-white">Tryout Gratis</a></li>
+            <li><a href="tryoutgratis.html" class="hover:text-white">Tryout Gratis (Rabu & Sabtu)</a></li>
             <li><a href="login.html" class="hover:text-white">Masuk Member</a></li>
             <li><a href="registrasi.html" class="hover:text-white">Daftar</a></li>
           </ul>
@@ -149,6 +208,20 @@
   <script src="js/firebase-config.js"></script>
   <script>
     document.getElementById('mbtn').onclick = () => document.getElementById('mmenu').classList.toggle('hidden');
+
+    // Countdown promo (akhir bulan)
+    function updateCountdown() {
+      const now = new Date();
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      const diff = end - now;
+      if (diff <= 0) { document.getElementById('promoTimer').textContent = 'Berakhir'; return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      document.getElementById('promoTimer').textContent = `${d}h ${h}j ${m}m`;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 60000);
   </script>
 </body>
 </html>
