@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Kerja Jadi ASN</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:'Plus Jakarta Sans',sans-serif}</style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+  <nav class="bg-white border-b shadow-sm sticky top-0 z-40">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-graduation-cap text-white"></i></div>
+        <span class="font-extrabold text-blue-600 text-lg">KERJA JADI <span class="text-yellow-500">ASN</span></span>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="text-right hidden sm:block">
+          <p class="text-xs text-slate-500">Kode Peserta</p>
+          <p id="kodeUser" class="font-mono font-bold text-slate-800 text-sm">-</p>
+        </div>
+        <button onclick="logoutConfirm()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-100"><i class="fa-solid fa-power-off"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mx-auto px-4 py-8 max-w-6xl">
+
+    <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-8 text-white mb-8 shadow-xl">
+      <h1 class="text-2xl md:text-3xl font-extrabold mb-2">Selamat Datang, <span id="namaUser">Peserta</span>! 👋</h1>
+      <p class="text-blue-100">Paket Aktif: <span id="paketUser" class="font-bold">-</span> · Masa Aktif: <span id="expiredUser" class="font-bold">-</span></p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="md:col-span-2">
+        <h2 class="text-xl font-bold mb-4"><i class="fa-solid fa-list-check text-blue-600 mr-2"></i>Paket Tryout</h2>
+        <div id="listTryout" class="space-y-3">
+          <div class="bg-white rounded-2xl p-6 animate-pulse"><div class="h-4 bg-slate-200 rounded w-1/2"></div></div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border">
+          <h3 class="font-bold mb-4">📊 Statistik</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-blue-50 rounded-xl p-3 text-center">
+              <div id="statTotal" class="text-2xl font-black text-blue-600">0</div>
+              <div class="text-xs text-slate-500">Selesai</div>
+            </div>
+            <div class="bg-green-50 rounded-xl p-3 text-center">
+              <div id="statBest" class="text-2xl font-black text-green-600">-</div>
+              <div class="text-xs text-slate-500">Terbaik</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white">
+          <h3 class="font-bold mb-2"><i class="fa-solid fa-crown"></i> Upgrade Paket</h3>
+          <p class="text-sm text-yellow-50 mb-4">Dapatkan materi lengkap & lebih banyak tryout.</p>
+          <a href="https://wa.me/6285696409288?text=Halo%20Admin,%20saya%20ingin%20upgrade%20paket" target="_blank" class="block bg-white text-orange-600 font-bold py-3 rounded-xl text-center hover:bg-orange-50">Hubungi Admin</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script>
+    const sess = KJ.getSession();
+    if (!sess) location.href = 'login.html';
+
+    document.getElementById('kodeUser').textContent = sess.kode;
+    document.getElementById('namaUser').textContent = sess.nama || 'Peserta';
+    document.getElementById('paketUser').textContent = 'Paket ' + (sess.paket || '-');
+    document.getElementById('expiredUser').textContent = sess.expired ? KJ.fmtDate(sess.expired) : '-';
+
+    function logoutConfirm() {
+      if (confirm('Keluar dari dashboard?')) KJ.logout();
+    }
+
+    async function loadTryouts() {
+      try {
+        // Ambil semua tryout yang aktif
+        const snap = await db.collection('tryout').where('aktif', '==', true).get();
+        const tryouts = [];
+        snap.forEach(d => tryouts.push({id: d.id, ...d.data()}));
+        tryouts.sort((a,b) => (a.urutan||0) - (b.urutan||0));
+
+        // Filter sesuai paket user
+        const userPaket = String(sess.paket);
+        const allowed = tryouts.filter(t => {
+          if (t.tipe === 'gratis') return true;
+          return String(t.paket) === userPaket || userPaket === '3';
+        });
+
+        // Load hasil user
+        const hasilSnap = await db.collection('hasil').where('kode', '==', sess.kode).get();
+        const hasilMap = {};
+        hasilSnap.forEach(h => { hasilMap[h.data().tryoutId] = h.data(); });
+
+        let totalSelesai = 0, best = 0;
+        const list = document.getElementById('listTryout');
+        list.innerHTML = '';
+
+        if (allowed.length === 0) {
+          list.innerHTML = '<div class="bg-white rounded-2xl p-8 text-center text-slate-500">Belum ada paket tryout tersedia.</div>';
+          return;
+        }
+
+        allowed.forEach(t => {
+          const h = hasilMap[t.id];
+          if (h) { totalSelesai++; if (h.total > best) best = h.total; }
+          const isDone = !!h;
+          list.innerHTML += `
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 hover:shadow-lg transition flex items-center justify-between gap-4">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 ${isDone?'bg-green-100 text-green-600':'bg-blue-50 text-blue-600'} rounded-xl flex items-center justify-center font-black text-lg">${t.urutan||'#'}</div>
+                <div>
+                  <h3 class="font-bold">${t.nama}</h3>
+                  <p class="text-xs text-slate-500">${t.twk||30} TWK · ${t.tiu||35} TIU · ${t.tkp||45} TKP · ${t.waktuMenit||100} menit</p>
+                  ${isDone?`<p class="text-xs font-bold text-green-600 mt-1"><i class="fa-solid fa-check-circle"></i> Skor: ${h.total}</p>`:''}
+                </div>
+              </div>
+              ${isDone?
+                `<a href="hasil.html?id=${h.id}" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-200">Hasil</a>`:
+                `<a href="tryout.html?id=${t.id}" class="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-blue-700"><i class="fa-solid fa-play mr-1"></i> Mulai</a>`}
+            </div>`;
+        });
+
+        document.getElementById('statTotal').textContent = totalSelesai;
+        document.getElementById('statBest').textContent = best || '-';
+      } catch (e) {
+        console.error(e);
+        document.getElementById('listTryout').innerHTML = '<div class="bg-red-50 text-red-600 rounded-2xl p-6">Gagal memuat: ' + e.message + '</div>';
+      }
+    }
+
+    (async () => {
+      // Silent anon auth agar bisa baca data
+      if (!auth.currentUser) { try { await auth.signInAnonymously(); } catch{} }
+      loadTryouts();
+    })();
+  </script>
+</body>
+</html>
