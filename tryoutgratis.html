@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tryout Gratis Sabtu — Kerja Jadi ASN</title>
+  <title>Tryout Gratis Rabu & Sabtu — Kerja Jadi ASN</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -11,28 +11,42 @@
 </head>
 <body class="bg-gradient-to-br from-green-50 to-emerald-50 min-h-screen">
 
+  <!-- Promo top banner -->
+  <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white py-2 px-4 text-center text-xs md:text-sm font-bold">
+    🔥 PROMO TERBATAS! Diskon 30% Paket Premium - Dari Rp 99rb jadi <span class="bg-white text-red-600 px-2 py-0.5 rounded">Rp 69rb</span> · <a href="registrasi.html" class="underline">Ambil Sekarang →</a>
+  </div>
+
   <nav class="bg-white/90 backdrop-blur shadow-sm sticky top-0 z-30">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
       <a href="index.html" class="flex items-center gap-2 text-blue-600 font-extrabold">KERJA JADI <span class="text-yellow-500">ASN</span></a>
-      <a href="login.html" class="text-blue-600 font-bold text-sm">Masuk</a>
+      <div class="flex gap-3 items-center">
+        <a href="registrasi.html" class="text-blue-600 font-bold text-sm hidden sm:block">Daftar</a>
+        <a href="login.html" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-sm">Masuk</a>
+      </div>
     </div>
   </nav>
 
-  <main class="container mx-auto px-4 py-12 max-w-2xl">
+  <main class="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
+
+    <!-- Header -->
     <div class="text-center mb-8">
       <div class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-sm mb-4">
-        <i class="fa-solid fa-gift"></i> GRATIS SETIAP SABTU
+        <i class="fa-solid fa-gift"></i> GRATIS SETIAP RABU & SABTU
       </div>
-      <h1 class="text-4xl font-extrabold mb-3">Tryout Gratis SKD</h1>
-      <p class="text-slate-600">Latihan soal SKD lengkap 110 soal, gratis tanpa biaya setiap hari Sabtu.</p>
+      <h1 class="text-3xl md:text-4xl font-extrabold mb-3">Tryout Gratis SKD CPNS</h1>
+      <p class="text-slate-600 max-w-lg mx-auto">Latihan soal SKD lengkap 110 soal, gratis tanpa biaya setiap hari <strong>Rabu</strong> dan <strong>Sabtu</strong>. Tingkatkan peluang lolos CPNS!</p>
     </div>
 
-    <div id="statusBox" class="bg-white rounded-2xl p-8 shadow-xl mb-6">
+    <!-- Status / Form Box -->
+    <div id="statusBox" class="bg-white rounded-3xl p-8 shadow-xl mb-8 border border-green-100">
       <div class="text-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-green-600"></i><p class="mt-3 text-slate-500">Memeriksa jadwal...</p></div>
     </div>
 
-    <div id="formBox" class="bg-white rounded-2xl p-8 shadow-xl hidden">
-      <h2 class="text-xl font-bold mb-4"><i class="fa-solid fa-play-circle text-green-600 mr-2"></i>Mulai Tryout Gratis</h2>
+    <div id="formBox" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl hidden border border-green-100">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center"><i class="fa-solid fa-play-circle text-green-600"></i></div>
+        <h2 class="text-xl font-bold">Mulai Tryout Gratis Hari Ini</h2>
+      </div>
       <form id="formGratis" class="space-y-4">
         <div>
           <label class="block text-sm font-bold mb-1">Nama Lengkap</label>
@@ -45,36 +59,136 @@
         <button type="submit" id="btnStart" class="w-full bg-green-600 text-white font-extrabold py-4 rounded-2xl hover:bg-green-700 shadow-lg">
           <i class="fa-solid fa-bolt mr-2"></i> Mulai Tryout Sekarang
         </button>
+        <p class="text-xs text-slate-500 text-center">Dengan mengikuti tryout, Anda setuju bergabung dengan grup WA belajar kami.</p>
       </form>
     </div>
+
+    <!-- MULTI WA GROUP CTA -->
+    <section class="mt-12">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-extrabold mb-2">🎯 Gabung Grup Belajar & Info Tryout</h2>
+        <p class="text-slate-600">Update jadwal tryout Rabu & Sabtu, tips SKD, dan diskusi dengan pejuang ASN lainnya</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4">
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-100 hover:border-green-400 hover:shadow-xl transition-all">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
+            <i class="fa-brands fa-whatsapp text-green-600 text-2xl"></i>
+          </div>
+          <h3 class="font-bold mb-2">Grup Tryout Gratis</h3>
+          <p class="text-sm text-slate-600 mb-4">Info jadwal tryout gratis Rabu & Sabtu + tips pengerjaan soal</p>
+          <a href="https://chat.whatsapp.com/GANTI_LINK_1" target="_blank" class="block bg-green-600 text-white text-center py-2.5 rounded-xl font-bold hover:bg-green-700 text-sm">
+            <i class="fa-brands fa-whatsapp mr-1"></i> Gabung Grup
+          </a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-100 hover:border-blue-400 hover:shadow-xl transition-all">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
+            <i class="fa-brands fa-whatsapp text-blue-600 text-2xl"></i>
+          </div>
+          <h3 class="font-bold mb-2">Grup Belajar SKD</h3>
+          <p class="text-sm text-slate-600 mb-4">Materi TWK/TIU/TKP, pembahasan soal, dan tips & trik mengerjakan</p>
+          <a href="https://chat.whatsapp.com/GANTI_LINK_2" target="_blank" class="block bg-blue-600 text-white text-center py-2.5 rounded-xl font-bold hover:bg-blue-700 text-sm">
+            <i class="fa-brands fa-whatsapp mr-1"></i> Gabung Grup
+          </a>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-purple-100 hover:border-purple-400 hover:shadow-xl transition-all">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
+            <i class="fa-brands fa-whatsapp text-purple-600 text-2xl"></i>
+          </div>
+          <h3 class="font-bold mb-2">Grup Info CPNS 2026</h3>
+          <p class="text-sm text-slate-600 mb-4">Update formasi, jadwal seleksi, dan berita terbaru seputar CPNS</p>
+          <a href="https://chat.whatsapp.com/GANTI_LINK_3" target="_blank" class="block bg-purple-600 text-white text-center py-2.5 rounded-xl font-bold hover:bg-purple-700 text-sm">
+            <i class="fa-brands fa-whatsapp mr-1"></i> Gabung Grup
+          </a>
+        </div>
+
+      </div>
+
+      <p class="text-center text-xs text-slate-500 mt-6 italic">*Link grup dapat berubah. Hubungi admin jika link tidak aktif.</p>
+    </section>
+
+    <!-- PROMO UPGRADE -->
+    <section class="mt-12">
+      <div class="bg-gradient-to-br from-yellow-400 via-orange-400 to-red-500 rounded-3xl p-8 text-white text-center shadow-2xl">
+        <div class="inline-block bg-white/20 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide mb-3">🔥 Promo Terbatas</div>
+        <h2 class="text-2xl md:text-3xl font-extrabold mb-3">Mau Lulus CPNS Tahun Ini?</h2>
+        <p class="text-white/95 mb-5 max-w-lg mx-auto">Upgrade ke Paket Premium! Dapatkan 10-20 paket tryout lengkap, materi SKD, ranking nasional, dan akses grup belajar eksklusif.</p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="registrasi.html" class="bg-white text-orange-600 font-extrabold py-3 px-8 rounded-2xl hover:bg-orange-50 shadow-lg">
+            <i class="fa-solid fa-crown mr-2 text-yellow-500"></i> Daftar Premium
+          </a>
+          <a href="https://wa.me/6285696409288?text=Halo%20Admin,%20saya%20ingin%20tanya%20paket%20premium" target="_blank" class="bg-white/20 backdrop-blur border-2 border-white/40 text-white font-bold py-3 px-8 rounded-2xl hover:bg-white/30">
+            <i class="fa-brands fa-whatsapp mr-2"></i> Tanya Admin
+          </a>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <footer class="text-center py-8 text-slate-500 text-sm">
+    &copy; 2026 Kerja Jadi ASN · <a href="index.html" class="text-blue-600 font-bold">Beranda</a>
+  </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="js/firebase-config.js"></script>
   <script>
-    async function checkDay() {
-      if (KJ.isSaturday()) {
+    // Cek hari ini (3 = Rabu, 6 = Sabtu)
+    function isFreeDay() {
+      const d = new Date().getDay();
+      return d === 3 || d === 6;
+    }
+
+    function checkDay() {
+      if (isFreeDay()) {
         document.getElementById('statusBox').classList.add('hidden');
         document.getElementById('formBox').classList.remove('hidden');
       } else {
         const now = new Date();
         const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-        const daysUntilSat = (6 - now.getDay() + 7) % 7 || 7;
-        const nextSat = new Date(now);
-        nextSat.setDate(now.getDate() + daysUntilSat);
+
+        // Cari hari Rabu/Sabtu berikutnya
+        let targetDay = -1, daysUntil = 7;
+        for (let i = 1; i <= 7; i++) {
+          const checkDay = (now.getDay() + i) % 7;
+          if (checkDay === 3 || checkDay === 6) {
+            targetDay = checkDay;
+            daysUntil = i;
+            break;
+          }
+        }
+        const nextDate = new Date(now);
+        nextDate.setDate(now.getDate() + daysUntil);
 
         document.getElementById('statusBox').innerHTML = `
           <div class="text-center">
             <i class="fa-solid fa-calendar-xmark text-5xl text-slate-300 mb-4"></i>
-            <h3 class="text-xl font-bold mb-2">Tryout Gratis Hanya Hari Sabtu</h3>
-            <p class="text-slate-600 mb-4">Hari ini ${days[now.getDay()]}. Tryout gratis dibuka kembali pada:</p>
-            <div class="bg-green-50 rounded-xl p-4 inline-block">
-              <div class="text-sm text-green-700 font-bold">Sabtu, ${nextSat.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
+            <h3 class="text-xl font-bold mb-2">Tryout Gratis Hanya Rabu & Sabtu</h3>
+            <p class="text-slate-600 mb-4">Hari ini <strong>${days[now.getDay()]}</strong>. Tryout gratis dibuka kembali pada:</p>
+            <div class="bg-green-50 border border-green-200 rounded-2xl p-4 inline-block mb-5">
+              <div class="text-xs text-green-700 font-bold uppercase mb-1">Jadwal Berikutnya</div>
+              <div class="text-lg text-green-800 font-extrabold">${days[targetDay]}, ${nextDate.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})}</div>
             </div>
-            <div class="mt-6">
-              <a href="registrasi.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold inline-block hover:bg-blue-700">Daftar Paket Premium</a>
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-left max-w-md mx-auto mb-5">
+              <p class="text-sm font-bold text-blue-800 mb-2"><i class="fa-solid fa-lightbulb mr-1"></i> Jangan tunggu! Persiapkan diri sekarang:</p>
+              <ul class="text-xs text-blue-700 space-y-1.5 list-disc list-inside">
+                <li>Daftar premium untuk akses tryout kapan saja</li>
+                <li>Gabung grup WA untuk info jadwal & materi</li>
+                <li>Baca tips mengerjakan SKD dari ahlinya</li>
+              </ul>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 justify-center">
+              <a href="registrasi.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700">
+                <i class="fa-solid fa-crown mr-1"></i> Daftar Premium
+              </a>
+              <a href="https://chat.whatsapp.com/GANTI_LINK_1" target="_blank" class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700">
+                <i class="fa-brands fa-whatsapp mr-1"></i> Gabung Grup
+              </a>
             </div>
           </div>`;
       }
@@ -90,7 +204,6 @@
         const fd = new FormData(e.target);
         const kodeGratis = 'GRATIS-' + Date.now().toString(36).toUpperCase();
 
-        // Simpan sebagai peserta sementara
         await db.collection('peserta').doc(kodeGratis).set({
           kode: kodeGratis,
           nama: fd.get('nama').trim(),
@@ -102,14 +215,9 @@
 
         KJ.setSession({ kode: kodeGratis, nama: fd.get('nama').trim(), paket: 'gratis' });
 
-        // Cari tryout gratis
         const snap = await db.collection('tryout').where('tipe', '==', 'gratis').where('aktif', '==', true).limit(1).get();
-        if (snap.empty) {
-          KJ.toast('Tryout gratis belum disiapkan. Hubungi admin.', 'warning');
-          return;
-        }
-        const tryoutId = snap.docs[0].id;
-        location.href = `tryout.html?id=${tryoutId}`;
+        if (snap.empty) { KJ.toast('Tryout gratis belum disiapkan admin.', 'warning'); return; }
+        location.href = `tryout.html?id=${snap.docs[0].id}`;
       } catch (err) {
         KJ.toast('Error: ' + err.message, 'error');
         btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i> Mulai Tryout Sekarang';
