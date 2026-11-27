@@ -21,7 +21,7 @@
   </nav>
 
   <main class="container mx-auto px-4 py-8 max-w-4xl">
-    <div id="container" class="bg-white rounded-3xl p-8 shadow-xl">
+    <div id="container" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl">
       <div class="text-center py-8">
         <i class="fa-solid fa-spinner fa-spin text-4xl text-blue-600"></i>
         <p class="mt-4 text-slate-500">Memuat hasil...</p>
@@ -65,6 +65,116 @@
       }, 250);
     }
 
+    function renderBadgeSubtes(isLulus) {
+      return isLulus
+        ? `<span class="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-green-100 text-green-700"><i class="fa-solid fa-circle-check"></i> Lulus</span>`
+        : `<span class="inline-flex items-center gap-1 mt-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-700"><i class="fa-solid fa-circle-xmark"></i> Tidak Lulus</span>`;
+    }
+
+    function renderPembahasan(daftarSoal) {
+      if (!Array.isArray(daftarSoal) || daftarSoal.length === 0) {
+        return `
+          <div class="mt-8 border-t pt-6">
+            <div class="bg-slate-50 rounded-2xl p-6 text-center text-slate-500 text-sm">
+              <i class="fa-solid fa-book-open text-2xl text-slate-400 mb-2"></i>
+              <p>Data pembahasan soal tidak tersedia untuk sesi ujian ini.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      const itemsHTML = daftarSoal.map((item, idx) => {
+        const kategori = escapeHTML(item.kategori || item.subtes || 'SOAL');
+        const userJawab = (item.jawabanUser || '').toUpperCase();
+        const kunci = (item.kunci || '').toUpperCase();
+        const isTKP = kategori.toUpperCase() === 'TKP';
+
+        let statusBadge = '';
+        if (!userJawab) {
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 text-slate-700">Tidak Dijawab</span>`;
+        } else if (isTKP) {
+          const poin = Number(item.poin) || 0;
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-700">Poin: +${poin}</span>`;
+        } else if (userJawab === kunci) {
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-green-100 text-green-700"><i class="fa-solid fa-check mr-1"></i>Benar</span>`;
+        } else {
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700"><i class="fa-solid fa-xmark mr-1"></i>Salah</span>`;
+        }
+
+        const opsiHuruf = ['A', 'B', 'C', 'D', 'E'];
+        const pilihanObj = item.pilihan || {};
+        const pilihanHTML = opsiHuruf.map((huruf) => {
+          const teksOpsi = pilihanObj[huruf] ?? pilihanObj[huruf.toLowerCase()];
+          if (!teksOpsi) return '';
+
+          const isKunci = huruf === kunci;
+          const isPilihanUser = huruf === userJawab;
+
+          let styleClass = 'border-slate-200 bg-white text-slate-700';
+          let labelTambahan = '';
+
+          if (isKunci) {
+            styleClass = 'border-green-500 bg-green-50 text-green-900 font-semibold';
+            labelTambahan = `<span class="ml-auto text-xs font-bold text-green-700"><i class="fa-solid fa-check-circle mr-1"></i>Kunci</span>`;
+          } else if (isPilihanUser && !isTKP) {
+            styleClass = 'border-red-400 bg-red-50 text-red-900';
+            labelTambahan = `<span class="ml-auto text-xs font-bold text-red-600"><i class="fa-solid fa-xmark-circle mr-1"></i>Jawabanmu</span>`;
+          } else if (isPilihanUser && isTKP) {
+            styleClass = 'border-purple-400 bg-purple-50 text-purple-900 font-semibold';
+            labelTambahan = `<span class="ml-auto text-xs font-bold text-purple-700">Jawabanmu</span>`;
+          }
+
+          return `
+            <div class="flex items-start gap-3 p-3 rounded-xl border text-sm ${styleClass}">
+              <span class="font-bold shrink-0">${huruf}.</span>
+              <span>${escapeHTML(teksOpsi)}</span>
+              ${labelTambahan}
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="border border-slate-200 rounded-2xl p-5 mb-4 bg-white">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="bg-blue-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg">No. ${idx + 1}</span>
+                <span class="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-lg">${kategori}</span>
+              </div>
+              ${statusBadge}
+            </div>
+
+            <p class="text-slate-800 text-sm md:text-base leading-relaxed mb-4 whitespace-pre-line">${escapeHTML(item.pertanyaan || item.soal || '')}</p>
+
+            <div class="space-y-2 mb-4">
+              ${pilihanHTML}
+            </div>
+
+            <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-4 text-sm text-slate-700">
+              <div class="font-bold text-blue-800 mb-1"><i class="fa-solid fa-lightbulb mr-1.5 text-yellow-500"></i>Pembahasan:</div>
+              <p class="leading-relaxed whitespace-pre-line">${escapeHTML(item.penjelasan || item.pembahasan || 'Tidak ada catatan pembahasan.')}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="mt-8 border-t pt-6">
+          <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-800">Pembahasan Soal</h2>
+              <p class="text-xs text-slate-500">Evaluasi jawaban dan pelajari kunci pembahasan tiap nomor</p>
+            </div>
+            <button id="togglePembahasanBtn" type="button" class="bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-sm px-4 py-2 rounded-xl transition">
+              <i class="fa-solid fa-eye-slash mr-1.5"></i>Sembunyikan Pembahasan
+            </button>
+          </div>
+          <div id="listPembahasan">
+            ${itemsHTML}
+          </div>
+        </div>
+      `;
+    }
+
     (async () => {
       const id = new URLSearchParams(location.search).get('id');
       if (!id) {
@@ -78,9 +188,18 @@
         if (!doc.exists) throw new Error('Hasil tidak ditemukan');
 
         const d = doc.data();
-        const lulus = Boolean(d.lulus);
 
-        // Gunakan nama class Tailwind secara utuh agar terbaca oleh Tailwind CDN
+        const twk = Number(d.twk) || 0;
+        const tiu = Number(d.tiu) || 0;
+        const tkp = Number(d.tkp) || 0;
+        const total = Number(d.total) || 0;
+
+        // Cek kelulusan per subtes berdasarkan ambang batas SKD
+        const lulusTWK = twk >= 65;
+        const lulusTIU = tiu >= 80;
+        const lulusTKP = tkp >= 166;
+        const lulus = typeof d.lulus === 'boolean' ? d.lulus : (lulusTWK && lulusTIU && lulusTKP && total >= 311);
+
         const theme = lulus
           ? {
               badgeBg: 'bg-green-100',
@@ -99,15 +218,27 @@
               title: 'BELUM LULUS'
             };
 
+        const namaTryout = d.namaTryout || 'Tryout SKD CPNS';
         const waktu = Number(d.waktuPengerjaan) || 0;
         const mins = Math.floor(waktu / 60);
         const secs = waktu % 60;
-
-        const twk = Number(d.twk) || 0;
-        const tiu = Number(d.tiu) || 0;
-        const tkp = Number(d.tkp) || 0;
-        const total = Number(d.total) || 0;
         const persentase = Math.min(100, Math.max(0, (total / 550) * 100)).toFixed(1);
+
+        // Susun pesan WhatsApp
+        const pesanWA = [
+          `*HASIL TRYOUT SKD — KERJA JADI ASN*`,
+          `Paket: ${namaTryout}`,
+          ``,
+          `• TWK: *${twk}* / 150 (${lulusTWK ? 'Lulus' : 'Tidak Lulus'})`,
+          `• TIU: *${tiu}* / 175 (${lulusTIU ? 'Lulus' : 'Tidak Lulus'})`,
+          `• TKP: *${tkp}* / 225 (${lulusTKP ? 'Lulus' : 'Tidak Lulus'})`,
+          `• Total Skor: *${total}* / 550`,
+          ``,
+          `Status: *${lulus ? 'LULUS AMBANG BATAS 🎉' : 'BELUM LULUS 💪'}*`
+        ].join('\n');
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(pesanWA)}`;
+
+        const daftarPembahasan = d.pembahasan || d.detailJawaban || [];
 
         document.getElementById('container').innerHTML = `
           <div class="text-center mb-8">
@@ -115,29 +246,33 @@
               <i class="fa-solid ${theme.icon} text-4xl ${theme.text}"></i>
             </div>
             <h1 class="text-3xl font-extrabold ${theme.text}">${theme.title}</h1>
-            <p class="text-slate-500 mt-2">${escapeHTML(d.namaTryout || 'Tryout SKD CPNS')}</p>
+            <p class="text-slate-500 mt-2">${escapeHTML(namaTryout)}</p>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-blue-50 rounded-2xl p-4 text-center">
-              <div class="text-xs font-bold text-slate-500 mb-1">TWK</div>
+            <div class="bg-blue-50 rounded-2xl p-4 text-center flex flex-col items-center justify-between">
+              <div class="text-xs font-bold text-slate-500 mb-1">TWK (PG ≥ 65)</div>
               <div class="text-2xl font-black text-blue-600">${twk}</div>
               <div class="text-xs text-slate-500">/ 150</div>
+              ${renderBadgeSubtes(lulusTWK)}
             </div>
-            <div class="bg-yellow-50 rounded-2xl p-4 text-center">
-              <div class="text-xs font-bold text-slate-500 mb-1">TIU</div>
+            <div class="bg-yellow-50 rounded-2xl p-4 text-center flex flex-col items-center justify-between">
+              <div class="text-xs font-bold text-slate-500 mb-1">TIU (PG ≥ 80)</div>
               <div class="text-2xl font-black text-yellow-600">${tiu}</div>
               <div class="text-xs text-slate-500">/ 175</div>
+              ${renderBadgeSubtes(lulusTIU)}
             </div>
-            <div class="bg-purple-50 rounded-2xl p-4 text-center">
-              <div class="text-xs font-bold text-slate-500 mb-1">TKP</div>
+            <div class="bg-purple-50 rounded-2xl p-4 text-center flex flex-col items-center justify-between">
+              <div class="text-xs font-bold text-slate-500 mb-1">TKP (PG ≥ 166)</div>
               <div class="text-2xl font-black text-purple-600">${tkp}</div>
               <div class="text-xs text-slate-500">/ 225</div>
+              ${renderBadgeSubtes(lulusTKP)}
             </div>
-            <div class="${theme.cardBg} rounded-2xl p-4 text-center">
+            <div class="${theme.cardBg} rounded-2xl p-4 text-center flex flex-col items-center justify-between">
               <div class="text-xs font-bold text-slate-500 mb-1">TOTAL</div>
               <div class="text-2xl font-black ${theme.text}">${total}</div>
               <div class="text-xs text-slate-500">/ 550</div>
+              ${renderBadgeSubtes(lulus)}
             </div>
           </div>
 
@@ -158,13 +293,33 @@
             <div class="flex justify-between mt-2"><span>Benar TIU</span><strong>${Number(d.benarTIU) || 0} soal</strong></div>
           </div>
 
-          <div class="flex gap-3">
-            <a href="dashboard.html" class="flex-1 bg-slate-100 text-slate-700 font-bold py-3 rounded-xl text-center hover:bg-slate-200">Kembali</a>
-            <a href="tryout.html?id=${encodeURIComponent(d.tryoutId || '')}" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-xl text-center hover:bg-blue-700">Coba Lagi</a>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a href="dashboard.html" class="bg-slate-100 text-slate-700 font-bold py-3 px-4 rounded-xl text-center hover:bg-slate-200 transition">
+              Kembali
+            </a>
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-emerald-600 transition flex items-center justify-center gap-2">
+              <i class="fa-brands fa-whatsapp text-lg"></i> Bagikan Hasil
+            </a>
+            <a href="tryout.html?id=${encodeURIComponent(d.tryoutId || '')}" class="bg-blue-600 text-white font-bold py-3 px-4 rounded-xl text-center hover:bg-blue-700 transition">
+              Coba Lagi
+            </a>
           </div>
+
+          ${renderPembahasan(daftarPembahasan)}
         `;
 
-        // Jalankan confetti di dalam blok async setelah UI dirender
+        // Event listener tombol buka/tutup pembahasan
+        const toggleBtn = document.getElementById('togglePembahasanBtn');
+        const listPembahasan = document.getElementById('listPembahasan');
+        if (toggleBtn && listPembahasan) {
+          toggleBtn.addEventListener('click', () => {
+            const isHidden = listPembahasan.classList.toggle('hidden');
+            toggleBtn.innerHTML = isHidden
+              ? '<i class="fa-solid fa-eye mr-1.5"></i>Tampilkan Pembahasan'
+              : '<i class="fa-solid fa-eye-slash mr-1.5"></i>Sembunyikan Pembahasan';
+          });
+        }
+
         if (lulus) {
           jalankanConfetti();
         }
