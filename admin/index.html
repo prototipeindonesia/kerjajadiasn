@@ -327,32 +327,57 @@
   </div>
 </div>
 
-<!-- MODAL TRYOUT -->
+<!-- MODAL TRYOUT (TAMBAH & EDIT) -->
 <div id="modalTryout" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl max-w-md w-full p-6">
-    <h3 class="text-xl font-bold mb-4">Tambah Tryout Baru</h3>
+    <div class="flex justify-between items-center mb-4">
+      <h3 id="modalTryoutTitle" class="text-xl font-bold">Tambah Tryout Baru</h3>
+      <button onclick="closeModal('modalTryout')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
     <div class="space-y-3">
-      <input id="tNama" placeholder="Nama Tryout (Cth: SKD Paket 1)" class="w-full px-4 py-2.5 rounded-lg border">
-      <select id="tTipe" class="w-full px-4 py-2.5 rounded-lg border">
-        <option value="premium">Premium (Berbayar)</option>
-        <option value="gratis">Gratis (Rabu & Sabtu)</option>
-      </select>
-      <select id="tPaket" class="w-full px-4 py-2.5 rounded-lg border">
-        <option value="1">Untuk Paket 1</option>
-        <option value="2">Untuk Paket 2</option>
-        <option value="3">Untuk Paket 3 (Semua)</option>
-      </select>
-      <input id="tUrutan" type="number" placeholder="Urutan Tampil (1,2,3..)" value="1" class="w-full px-4 py-2.5 rounded-lg border">
-      <div class="grid grid-cols-3 gap-2">
-        <input id="tTwk" type="number" placeholder="Jml TWK" value="30" class="px-3 py-2 rounded-lg border text-sm">
-        <input id="tTiu" type="number" placeholder="Jml TIU" value="35" class="px-3 py-2 rounded-lg border text-sm">
-        <input id="tTkp" type="number" placeholder="Jml TKP" value="45" class="px-3 py-2 rounded-lg border text-sm">
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">Nama Tryout</label>
+        <input id="tNama" placeholder="Nama Tryout (Cth: SKD Paket 1)" class="w-full px-4 py-2.5 rounded-lg border text-sm">
       </div>
-      <input id="tWaktu" type="number" placeholder="Waktu (menit)" value="100" class="w-full px-4 py-2.5 rounded-lg border">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">Tipe Akses</label>
+          <select id="tTipe" class="w-full px-3 py-2.5 rounded-lg border text-sm">
+            <option value="premium">Premium (Berbayar)</option>
+            <option value="gratis">Gratis (Rabu & Sabtu)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">Target Paket</label>
+          <select id="tPaket" class="w-full px-3 py-2.5 rounded-lg border text-sm">
+            <option value="1">Untuk Paket 1</option>
+            <option value="2">Untuk Paket 2</option>
+            <option value="3">Untuk Paket 3 (Semua)</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">Urutan Tampil</label>
+          <input id="tUrutan" type="number" placeholder="1, 2, 3..." value="1" class="w-full px-3 py-2 rounded-lg border text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 mb-1">Durasi (Menit)</label>
+          <input id="tWaktu" type="number" placeholder="100" value="100" class="w-full px-3 py-2 rounded-lg border text-sm">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">Komposisi Soal (TWK / TIU / TKP)</label>
+        <div class="grid grid-cols-3 gap-2">
+          <input id="tTwk" type="number" placeholder="Jml TWK" value="30" class="px-3 py-2 rounded-lg border text-sm">
+          <input id="tTiu" type="number" placeholder="Jml TIU" value="35" class="px-3 py-2 rounded-lg border text-sm">
+          <input id="tTkp" type="number" placeholder="Jml TKP" value="45" class="px-3 py-2 rounded-lg border text-sm">
+        </div>
+      </div>
     </div>
     <div class="flex gap-2 mt-5">
       <button onclick="closeModal('modalTryout')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
-      <button onclick="saveTryout()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold">Simpan</button>
+      <button id="btnSaveTryout" onclick="saveTryout()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">Simpan</button>
     </div>
   </div>
 </div>
@@ -475,13 +500,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="../js/firebase-config.js"></script>
 <script>
-// Sesuaikan nama koleksi hasil ujian jika di Firestore menggunakan nama lain (mis. 'riwayat_tryout' atau 'hasil')
 const COLLECTION_HASIL = 'hasil';
 
 let isAdmin = false;
 let currentTab = 'overview';
 let savedGroupLink = '';
 
+let allTryoutList = [];
+let editTryoutId = null;
 let currentSoalList = [];
 let editSoalId = null;
 let allTransaksiList = [];
@@ -610,7 +636,7 @@ async function saveGroupLink() {
   alert('✅ Link grup default disimpan!');
 }
 
-// ============ TRYOUT ============
+// ============ TRYOUT (TAMBAH & EDIT PAKET) ============
 async function loadTryoutDropdown() {
   const snap = await db.collection('tryout').get();
   const selSoal = document.getElementById('filterTryoutSoal');
@@ -631,20 +657,28 @@ async function loadTryoutAdmin() {
   const box = document.getElementById('tryoutAdminList');
   box.innerHTML = '<p class="text-center text-slate-400 py-4">Loading...</p>';
   const snap = await db.collection('tryout').orderBy('urutan').get();
-  const list = [];
-  snap.forEach(d => list.push({id: d.id, ...d.data()}));
+  allTryoutList = [];
+  snap.forEach(d => allTryoutList.push({id: d.id, ...d.data()}));
   
-  if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada tryout. Tambahkan dulu.</p>'; return; }
+  if (allTryoutList.length === 0) {
+    box.innerHTML = '<p class="text-center text-slate-400 py-4">Belum ada tryout. Tambahkan dulu.</p>';
+    return;
+  }
 
-  box.innerHTML = list.map(t => `
-    <div class="border rounded-xl p-3 flex justify-between items-center">
+  box.innerHTML = allTryoutList.map(t => `
+    <div class="border rounded-xl p-3 flex flex-wrap justify-between items-center gap-2 hover:bg-slate-50">
       <div>
-        <p class="font-bold text-sm">${t.nama}</p>
-        <p class="text-xs text-slate-500">${t.tipe} · Paket ${t.paket} · ${t.twk||30}TWK/${t.tiu||35}TIU/${t.tkp||45}TKP · ${t.waktuMenit||100}m</p>
+        <div class="flex items-center gap-2">
+          <p class="font-bold text-sm">${t.nama}</p>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700">Paket ${t.paket}</span>
+          <span class="text-[11px] px-2 py-0.5 rounded ${t.tipe === 'gratis' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${t.tipe}</span>
+        </div>
+        <p class="text-xs text-slate-500 mt-0.5">Urutan #${t.urutan||1} · ${t.twk||30} TWK / ${t.tiu||35} TIU / ${t.tkp||45} TKP · ${t.waktuMenit||100} menit</p>
       </div>
-      <div class="flex gap-1">
-        <button onclick="toggleTryoutAktif('${t.id}', ${t.aktif})" class="text-${t.aktif?'green':'red'}-600 p-2 hover:bg-slate-100 rounded"><i class="fa-solid fa-${t.aktif?'toggle-on':'toggle-off'}"></i></button>
-        <button onclick="deleteTryout('${t.id}')" class="text-red-500 p-2 hover:bg-red-50 rounded"><i class="fa-solid fa-trash"></i></button>
+      <div class="flex items-center gap-1">
+        <button onclick="showEditTryout('${t.id}')" class="text-blue-600 p-2 hover:bg-blue-50 rounded-lg" title="Edit Tryout & Paket"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button onclick="toggleTryoutAktif('${t.id}', ${t.aktif})" class="text-${t.aktif?'green':'red'}-600 p-2 hover:bg-slate-100 rounded-lg" title="${t.aktif?'Nonaktifkan':'Aktifkan'}"><i class="fa-solid fa-${t.aktif?'toggle-on':'toggle-off'}"></i></button>
+        <button onclick="deleteTryout('${t.id}')" class="text-red-500 p-2 hover:bg-red-50 rounded-lg" title="Hapus Tryout"><i class="fa-solid fa-trash"></i></button>
       </div>
     </div>
   `).join('');
@@ -662,27 +696,76 @@ async function deleteTryout(id) {
 }
 
 function showAddTryout() {
+  editTryoutId = null;
+  document.getElementById('modalTryoutTitle').textContent = 'Tambah Tryout Baru';
+  document.getElementById('btnSaveTryout').textContent = 'Simpan';
   document.getElementById('tNama').value = '';
+  document.getElementById('tTipe').value = 'premium';
+  document.getElementById('tPaket').value = '1';
+  document.getElementById('tUrutan').value = allTryoutList.length + 1;
+  document.getElementById('tTwk').value = 30;
+  document.getElementById('tTiu').value = 35;
+  document.getElementById('tTkp').value = 45;
+  document.getElementById('tWaktu').value = 100;
+  openModal('modalTryout');
+}
+
+function showEditTryout(id) {
+  const t = allTryoutList.find(item => item.id === id);
+  if (!t) return;
+
+  editTryoutId = id;
+  document.getElementById('modalTryoutTitle').textContent = 'Edit Tryout & Paket';
+  document.getElementById('btnSaveTryout').textContent = 'Update Tryout';
+
+  document.getElementById('tNama').value = t.nama || '';
+  document.getElementById('tTipe').value = t.tipe || 'premium';
+  document.getElementById('tPaket').value = String(t.paket || '1');
+  document.getElementById('tUrutan').value = t.urutan || 1;
+  document.getElementById('tTwk').value = t.twk ?? 30;
+  document.getElementById('tTiu').value = t.tiu ?? 35;
+  document.getElementById('tTkp').value = t.tkp ?? 45;
+  document.getElementById('tWaktu').value = t.waktuMenit || 100;
+
   openModal('modalTryout');
 }
 
 async function saveTryout() {
   const nama = document.getElementById('tNama').value.trim();
   if (!nama) { alert('Nama wajib diisi'); return; }
-  await db.collection('tryout').add({
-    nama,
-    tipe: document.getElementById('tTipe').value,
-    paket: document.getElementById('tPaket').value,
-    urutan: Number(document.getElementById('tUrutan').value)||1,
-    twk: Number(document.getElementById('tTwk').value)||30,
-    tiu: Number(document.getElementById('tTiu').value)||35,
-    tkp: Number(document.getElementById('tTkp').value)||45,
-    waktuMenit: Number(document.getElementById('tWaktu').value)||100,
-    aktif: true,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
-  closeModal('modalTryout');
-  loadTryoutAdmin(); loadTryoutDropdown();
+
+  const btn = document.getElementById('btnSaveTryout');
+  btn.disabled = true;
+
+  try {
+    const payload = {
+      nama,
+      tipe: document.getElementById('tTipe').value,
+      paket: document.getElementById('tPaket').value,
+      urutan: Number(document.getElementById('tUrutan').value) || 1,
+      twk: Number(document.getElementById('tTwk').value) || 30,
+      tiu: Number(document.getElementById('tTiu').value) || 35,
+      tkp: Number(document.getElementById('tTkp').value) || 45,
+      waktuMenit: Number(document.getElementById('tWaktu').value) || 100
+    };
+
+    if (editTryoutId) {
+      payload.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('tryout').doc(editTryoutId).update(payload);
+    } else {
+      payload.aktif = true;
+      payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('tryout').add(payload);
+    }
+
+    closeModal('modalTryout');
+    loadTryoutAdmin();
+    loadTryoutDropdown();
+  } catch (err) {
+    alert('Gagal menyimpan tryout: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ============ SOAL (CRUD + PREVIEW GAMBAR) ============
@@ -1007,7 +1090,6 @@ function renderHasil() {
   const box = document.getElementById('hasilList');
   const filtered = getFilteredHasil();
 
-  // Hitung ringkasan statistik
   const totalCount = filtered.length;
   const lulusCount = filtered.filter(h => h._lulus).length;
   const tidakCount = totalCount - lulusCount;
