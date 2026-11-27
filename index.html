@@ -302,5 +302,66 @@
     updateCountdown();
     setInterval(updateCountdown, 60000);
   </script>
+
+  <!-- Tambahkan sebelum tag </body> -->
+<!-- FOMO Popup -->
+<div id="fomoPopup" class="fixed bottom-4 left-4 bg-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 transform -translate-x-[150%] transition-transform duration-500 z-50 border-l-4 border-green-500">
+  <img id="fomoAvatar" src="" class="w-10 h-10 rounded-full bg-slate-200">
+  <div>
+    <p class="text-xs text-slate-500" id="fomoTime">Baru saja</p>
+    <p class="text-sm font-bold text-slate-800" id="fomoText">Seseorang membeli Paket 2</p>
+  </div>
+</div>
+
+<!-- Section Produk Digital (Letakkan setelah Pricing Widget) -->
+<section class="py-20 bg-white">
+  <div class="container mx-auto px-4 max-w-5xl">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-extrabold mb-3">📚 Produk Digital</h2>
+      <p class="text-slate-600">E-Book PDF Rangkuman Materi & Soal Pembahasan SKD/SKB</p>
+    </div>
+    <div id="produkDigitalList" class="grid md:grid-cols-3 gap-6">
+      <!-- Diisi via JS -->
+    </div>
+  </div>
+</section>
+
+<script>
+  // FOMO Logic
+  const names = ['Andi', 'Siti', 'Budi', 'Rina', 'Dewi', 'Agus', 'Lestari', 'Hendra'];
+  const packages = ['Paket 1', 'Paket 2', 'Paket 3', 'E-Book SKD'];
+  function showFomo() {
+    const popup = document.getElementById('fomoPopup');
+    const name = names[Math.floor(Math.random() * names.length)];
+    const pkg = packages[Math.floor(Math.random() * packages.length)];
+    const min = Math.floor(Math.random() * 59) + 1;
+    
+    document.getElementById('fomoAvatar').src = `https://ui-avatars.com/api/?name=${name}&background=random`;
+    document.getElementById('fomoText').innerHTML = `<b>${name}</b> membeli <b>${pkg}</b>`;
+    document.getElementById('fomoTime').textContent = `${min} menit lalu`;
+    
+    popup.classList.remove('-translate-x-[150%]');
+    setTimeout(() => popup.classList.add('-translate-x-[150%]'), 5000);
+  }
+  setInterval(showFomo, 45000); // Muncul tiap 45 detik
+  setTimeout(showFomo, 3000);
+
+  // Load Produk Digital
+  db.collection('produk_digital').get().then(snap => {
+    const box = document.getElementById('produkDigitalList');
+    if(snap.empty) { box.innerHTML = '<p class="col-span-3 text-center text-slate-500">Belum ada produk.</p>'; return; }
+    snap.forEach(doc => {
+      const p = doc.data();
+      box.innerHTML += `
+        <div class="bg-slate-50 border rounded-2xl p-5 text-center">
+          <i class="fa-solid fa-file-pdf text-4xl text-red-500 mb-3"></i>
+          <h3 class="font-bold text-lg mb-1">${p.nama}</h3>
+          <p class="text-xs text-slate-500 mb-3">${p.deskripsi}</p>
+          <p class="font-bold text-blue-600 text-xl mb-4">Rp ${p.harga.toLocaleString('id-ID')}</p>
+          <a href="registrasi.html?produk=${doc.id}" class="block bg-blue-600 text-white py-2 rounded-xl font-bold">Beli Sekarang</a>
+        </div>`;
+    });
+  });
+</script>
 </body>
 </html>
