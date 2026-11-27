@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — Kerja Jadi ASN</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -135,9 +136,20 @@
               <div id="statBest" class="text-2xl font-black text-green-600">-</div>
               <div class="text-xs text-slate-500">Terbaik</div>
             </div>
+            <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
+              <h3 class="font-bold mb-2"><i class="fa-solid fa-handshake-angle mr-2"></i>Jadi Mitra Affiliate</h3>
+              <p class="text-sm text-green-50 mb-4">Dapatkan komisi 10% dari setiap teman yang mendaftar via link Anda.</p>
+              <button onclick="daftarAffiliate()" class="block w-full bg-white text-green-600 font-bold py-2.5 rounded-xl text-center hover:bg-green-50">Daftar Affiliate</button>
+            </div>
           </div>
         </div>
 
+        <!-- Tambahkan di atas "Paket Tryout Anda" -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-sm border mb-6">
+          <h3 class="font-bold mb-4">📈 Grafik Pencapaian</h3>
+          <canvas id="chartNilai" height="80"></canvas>
+        </div>
+        
         <!-- Widget 3 Paket Promo -->
         <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-sm border">
           <h3 class="font-bold mb-4">🚀 Upgrade Paket</h3>
@@ -426,5 +438,36 @@
       loadTryouts();
     })();
   </script>
+  <script>
+ 
+  // Load Chart
+  async function loadChart() {
+    const snap = await db.collection('hasil').where('kode', '==', sess.kode).orderBy('tanggal', 'asc').get();
+    const labels = [], dataSkor = [];
+    snap.forEach((d, i) => {
+      labels.push('Tryout ' + (i+1));
+      dataSkor.push(d.data().total);
+    });
+    
+    new Chart(document.getElementById('chartNilai'), {
+      type: 'line',
+      data: {
+        labels: labels.length ? labels : ['Belum ada data'],
+        datasets: [{ label: 'Skor SKD', data: dataSkor.length ? dataSkor : [0], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 550 } } }
+    });
+  }
+  
+  function daftarAffiliate() {
+    const wa = prompt("Masukkan nomor WhatsApp Anda untuk dihubungi Admin:");
+    if(!wa) return;
+    db.collection('affiliate').add({
+      kode: sess.kode, nama: sess.nama, wa: wa, status: 'pending', createdAt: new Date()
+    }).then(() => {
+      KJ.toast('Pendaftaran Affiliate berhasil! Admin akan menghubungi Anda.', 'success');
+    });
+  }
+</script>
 </body>
 </html>
