@@ -309,4 +309,103 @@
 
     function toggleRagu() {
       const id = soalList[current].id;
-      if (ragu.has(id)) ragu.delete
+      if (ragu.has(id)) ragu.delete(id); else ragu.add(id);
+      renderSoal();
+    }
+
+    function prevSoal() { if (current > 0) { current--; renderSoal(); } }
+    function nextSoal() { if (current < soalList.length - 1) { current++; renderSoal(); } }
+
+    function renderNav() {
+      const g = document.getElementById('navGrid');
+      g.innerHTML = '';
+      soalList.forEach((s, i) => {
+        let cls = 'bg-slate-200 text-slate-700 hover:bg-slate-300';
+        if (jawaban[s.id]) cls = 'bg-blue-600 text-white hover:bg-blue-700';
+        if (ragu.has(s.id)) cls = 'bg-yellow-400 text-white hover:bg-yellow-500';
+        
+        const borderClass = (i === current) ? 'ring-2 ring-blue-500 ring-offset-1' : '';
+        
+        g.innerHTML += `<button onclick="gotoSoal(${i})" class="w-full aspect-square rounded text-xs font-bold ${cls} ${borderClass} transition-all">${i + 1}</button>`;
+      });
+      
+      // Update progress text
+      const dijawab = Object.keys(jawaban).length;
+      document.getElementById('navProgress').textContent = `${dijawab}/${soalList.length}`;
+    }
+
+    function gotoSoal(i) { current = i; renderSoal(); }
+
+    function confirmSubmit() {
+      if (isSubmitting) return;
+      const belum = soalList.length - Object.keys(jawaban).length;
+      if (belum > 0 && !confirm(`Masih ada ${belum} soal belum dijawab. Yakin ingin menyelesaikan ujian?`)) return;
+      doSubmit(false);
+    }
+
+    async function doSubmit(auto) {
+      if (isSubmitting) return;
+      if (!auto && !confirm('Kirim jawaban dan lihat hasil sekarang?')) return;
+      
+      isSubmitting = true;
+      clearInterval(timerInterval);
+      clearInterval(autoSaveInterval);
+      
+      // Tampilkan loading overlay tanpa merusak DOM yang ada
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+
+      try {
+        // Hitung skor
+        let twk = 0, tiu = 0, tkp = 0;
+        let benarTWK = 0, benarTIU = 0;
+        soalList.forEach(s => {
+          const jw = jawaban[s.id];
+          if (!jw) return;
+          const kat = s.kategori;
+          if (kat === 'TWK' || kat === 'TIU') {
+            if (jw === s.jawabanBenar) {
+              if (kat === 'TWK') { twk += 5; benarTWK++; }
+              if (kat === 'TIU') { tiu += 5; benarTIU++; }
+            }
+          } else if (kat === 'TKP') {
+            const skor = (s.skor && s.skor[jw.toLowerCase()]) || 0;
+            tkp += skor;
+          }
+        });
+        
+        const total = twk + tiu + tkp;
+        // SKD CPNS passing grade: TWK 65, TIU 80, TKP 166, Total 311
+        const lulus = twk >= 65 && tiu >= 80 && tkp >= 166 && total >= 311; 
+        const waktu = Math.floor((Date.now() - startTime) / 1000);
+
+        const hasilData = {
+          kode: sess.kode,
+          tryoutId,
+          namaTryout: document.getElementById('namaTryout').textContent,
+          twk, tiu, tkp, total, lulus,
+          benarTWK, benarTIU,
+          jawaban,
+          waktuPengerjaan: waktu,
+          tanggal: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const ref = await db.collection('hasil').add(hasilData);
+        
+        // Hapus data progress_tryout setelah berhasil disimpan ke hasil
+        await db.collection('progress_tryout').doc(sess.kode + '_' + tryoutId).delete().catch(() => {});
+
+        location.href = 'hasil.html?id=' + ref.id;
+        
+      } catch (e) {
+        isSubmitting = false;
+        document.getElementById('loadingOverlay').classList.add('hidden');
+        alert('Gagal menyimpan hasil: ' + e.message);
+        startTimer();
+        startAutoSave();
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
