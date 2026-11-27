@@ -8,20 +8,29 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body{font-family:'Plus Jakarta Sans',sans-serif}
-    /* Style tambahan untuk gambar agar responsif */
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .img-soal { max-height: 300px; object-fit: contain; border-radius: 0.5rem; margin-top: 1rem; border: 1px solid #e2e8f0; }
     .img-pilihan { max-height: 120px; object-fit: contain; border-radius: 0.375rem; margin-top: 0.5rem; border: 1px solid #e2e8f0; }
+    .watermark {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 50; overflow: hidden; opacity: 0.08;
+      display: flex; flex-wrap: wrap; align-content: space-between; justify-content: space-around;
+    }
+    .watermark span { font-size: 24px; font-weight: 900; transform: rotate(-30deg); color: #000; margin: 50px; user-select: none; }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
   <nav class="bg-white border-b shadow-sm sticky top-0 z-30">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <h1 class="font-bold text-slate-800 truncate max-w-[50%]"><i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i><span id="namaTryout">Tryout</span></h1>
+      <h1 class="font-bold text-slate-800 truncate max-w-[50%]">
+        <i class="fa-solid fa-pen-to-square text-blue-600 mr-2"></i><span id="namaTryout">Tryout</span>
+      </h1>
       <div class="flex items-center gap-3">
         <div id="timerBox" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-mono font-bold text-lg">--:--:--</div>
-        <button onclick="confirmSubmit()" class="bg-green-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-green-700 shadow-md shadow-green-200"><i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">Selesai</span></button>
+        <button onclick="confirmSubmit()" id="btnSubmit" class="bg-green-600 text-white px-5 py-2 rounded-xl font-bold text-sm hover:bg-green-700 shadow-md shadow-green-200 transition">
+          <i class="fa-solid fa-paper-plane"></i> <span class="hidden sm:inline">Selesai</span>
+        </button>
       </div>
     </div>
   </nav>
@@ -56,10 +65,16 @@
 
         <!-- Navigasi Bawah -->
         <div class="flex justify-between mt-4">
-          <button onclick="prevSoal()" id="btnPrev" class="bg-white border px-6 py-3 rounded-xl font-bold hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"><i class="fa-solid fa-chevron-left mr-2"></i> Sebelumnya</button>
-          <button onclick="nextSoal()" id="btnNext" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">Selanjutnya <i class="fa-solid fa-chevron-right ml-2"></i></button>
+          <button onclick="prevSoal()" id="btnPrev" class="bg-white border px-6 py-3 rounded-xl font-bold hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+            <i class="fa-solid fa-chevron-left mr-2"></i> Sebelumnya
+          </button>
+          <button onclick="nextSoal()" id="btnNext" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+            Selanjutnya <i class="fa-solid fa-chevron-right ml-2"></i>
+          </button>
         </div>
       </div>
+
+      <div class="watermark" id="watermarkContainer"></div>
 
       <!-- SIDEBAR NAVIGASI -->
       <div class="md:col-span-1">
@@ -79,6 +94,12 @@
     </div>
   </main>
 
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="hidden fixed inset-0 bg-white/80 backdrop-blur-sm z-[999] flex items-center justify-center flex-col">
+    <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
+    <p class="font-bold text-slate-700">Menyimpan hasil ujian...</p>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -95,11 +116,30 @@
     let durasiDetik = 100 * 60;
     let startTime = Date.now();
     let timerInterval;
-
-    if (!sess) { alert('Silakan login dulu'); location.href = 'login.html'; }
-    if (!tryoutId) { alert('Tryout tidak ditemukan'); location.href = 'dashboard.html'; }
+    let autoSaveInterval;
+    let isSubmitting = false;
 
     async function init() {
+      // Validasi session dan parameter URL terlebih dahulu
+      if (!sess) { 
+        alert('Silakan login dulu'); 
+        location.href = 'login.html'; 
+        return; 
+      }
+      if (!tryoutId) { 
+        alert('Tryout tidak ditemukan'); 
+        location.href = 'dashboard.html'; 
+        return; 
+      }
+
+      // Generate Watermark setelah dipastikan sess ada
+      const wm = document.getElementById('watermarkContainer');
+      for (let i = 0; i < 30; i++) {
+        const span = document.createElement('span');
+        span.textContent = sess.kode;
+        wm.appendChild(span);
+      }
+
       try {
         if (!auth.currentUser) await auth.signInAnonymously();
 
@@ -112,13 +152,18 @@
 
         // Load soal
         const snap = await db.collection('soal').where('tryoutId', '==', tryoutId).get();
-        snap.forEach(d => soalList.push({id: d.id, ...d.data()}));
-        soalList.sort((a,b) => a.nomor - b.nomor);
+        snap.forEach(d => soalList.push({ id: d.id, ...d.data() }));
+        soalList.sort((a, b) => (a.nomor || 0) - (b.nomor || 0));
 
         if (soalList.length === 0) throw new Error('Belum ada soal untuk tryout ini');
         document.getElementById('totalSoal').textContent = soalList.length;
 
+        // Cek apakah ada progres yang tersimpan sebelumnya
+        await loadProgress();
+
+        // Mulai timer, auto-save, dan render tampilan awal
         startTimer();
+        startAutoSave();
         renderSoal();
         renderNav();
       } catch (e) {
@@ -127,20 +172,63 @@
       }
     }
 
+    async function loadProgress() {
+      try {
+        const docRef = db.collection('progress_tryout').doc(sess.kode + '_' + tryoutId);
+        const doc = await docRef.get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (confirm('Ditemukan sesi tryout yang belum selesai. Lanjutkan dari pengerjaan terakhir?')) {
+            jawaban = data.jawaban || {};
+            ragu = new Set(data.ragu || []);
+            startTime = Date.now() - ((data.waktuTerpakai || 0) * 1000);
+            return true;
+          } else {
+            // Hapus progres lama jika user memilih mulai dari awal
+            await docRef.delete();
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal memuat progres sebelumnya:', err);
+      }
+      return false;
+    }
+
+    function startAutoSave() {
+      autoSaveInterval = setInterval(() => {
+        if (isSubmitting) return;
+        db.collection('progress_tryout').doc(sess.kode + '_' + tryoutId).set({
+          jawaban: jawaban,
+          ragu: Array.from(ragu),
+          waktuTerpakai: Math.floor((Date.now() - startTime) / 1000),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).catch(err => console.warn('Auto-save gagal:', err));
+      }, 10000); // Simpan tiap 10 detik
+    }
+    
     function startTimer() {
-      timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const sisa = durasiDetik - elapsed;
-        if (sisa <= 0) { clearInterval(timerInterval); doSubmit(true); return; }
-        const h = String(Math.floor(sisa/3600)).padStart(2,'0');
-        const m = String(Math.floor((sisa%3600)/60)).padStart(2,'0');
-        const s = String(sisa%60).padStart(2,'0');
-        const timerBox = document.getElementById('timerBox');
-        timerBox.textContent = `${h}:${m}:${s}`;
-        
-        // Ubah warna jika sisa waktu < 5 menit
-        if (sisa < 300) timerBox.className = 'bg-red-600 text-white px-4 py-2 rounded-xl font-mono font-bold text-lg animate-pulse';
-      }, 1000);
+      updateTimerDisplay(); // Jalankan langsung tanpa menunggu 1 detik pertama
+      timerInterval = setInterval(updateTimerDisplay, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const sisa = durasiDetik - elapsed;
+      if (sisa <= 0) { 
+        clearInterval(timerInterval); 
+        doSubmit(true); 
+        return; 
+      }
+      const h = String(Math.floor(sisa / 3600)).padStart(2, '0');
+      const m = String(Math.floor((sisa % 3600) / 60)).padStart(2, '0');
+      const s = String(sisa % 60).padStart(2, '0');
+      const timerBox = document.getElementById('timerBox');
+      timerBox.textContent = `${h}:${m}:${s}`;
+      
+      // Ubah warna jika sisa waktu < 5 menit
+      if (sisa < 300) {
+        timerBox.className = 'bg-red-600 text-white px-4 py-2 rounded-xl font-mono font-bold text-lg animate-pulse';
+      }
     }
 
     function renderSoal() {
@@ -151,7 +239,7 @@
       const badge = document.getElementById('kategoriBadge');
       badge.textContent = kat;
       badge.className = 'inline-block px-3 py-1 rounded-full text-xs font-bold text-white ' + 
-        (kat==='TWK'?'bg-blue-600':kat==='TIU'?'bg-yellow-500':'bg-purple-600');
+        (kat === 'TWK' ? 'bg-blue-600' : kat === 'TIU' ? 'bg-yellow-500' : 'bg-purple-600');
 
       document.getElementById('nomorSoal').textContent = current + 1;
       
@@ -169,25 +257,26 @@
         imgBox.classList.add('hidden');
       }
 
-      // Render Pilihan Jawaban
+      // Render Pilihan Jawaban (Mendukung teks saja, gambar saja, atau keduanya)
       const p = document.getElementById('pilihan');
       p.innerHTML = '';
-      ['A','B','C','D','E'].forEach(k => {
+      ['A', 'B', 'C', 'D', 'E'].forEach(k => {
         const lower = k.toLowerCase();
-        if (!s.pilihan || !s.pilihan[lower]) return;
-        
-        const dipilih = jawaban[s.id] === k;
-        const teksPilihan = s.pilihan[lower] || '';
+        const teksPilihan = (s.pilihan && s.pilihan[lower]) ? s.pilihan[lower] : '';
         const gambarPilihan = (s.gambarPilihan && s.gambarPilihan[lower]) ? s.gambarPilihan[lower] : '';
         
+        // Lewati opsi hanya jika teks dan gambarnya sama-sama kosong
+        if (teksPilihan.trim() === '' && gambarPilihan.trim() === '') return;
+        
+        const dipilih = jawaban[s.id] === k;
         let imgHtml = '';
         if (gambarPilihan.trim() !== '') {
           imgHtml = `<img src="${gambarPilihan}" class="img-pilihan" alt="Opsi ${k}" onerror="this.style.display='none'">`;
         }
 
         p.innerHTML += `
-          <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${dipilih?'border-blue-500 bg-blue-50 ring-1 ring-blue-500':'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}">
-            <input type="radio" name="pilihan" value="${k}" ${dipilih?'checked':''} onchange="pilihJawaban('${k}')" class="mt-1 w-4 h-4 text-blue-600 focus:ring-blue-500">
+          <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition ${dipilih ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'}">
+            <input type="radio" name="pilihan" value="${k}" ${dipilih ? 'checked' : ''} onchange="pilihJawaban('${k}')" class="mt-1 w-4 h-4 text-blue-600 focus:ring-blue-500">
             <div class="flex-1">
               <span class="font-bold text-blue-600 mr-2">${k}.</span>
               <span class="text-slate-700">${teksPilihan}</span>
@@ -220,94 +309,4 @@
 
     function toggleRagu() {
       const id = soalList[current].id;
-      if (ragu.has(id)) ragu.delete(id); else ragu.add(id);
-      renderSoal();
-    }
-
-    function prevSoal() { if (current > 0) { current--; renderSoal(); } }
-    function nextSoal() { if (current < soalList.length - 1) { current++; renderSoal(); } }
-
-    function renderNav() {
-      const g = document.getElementById('navGrid');
-      g.innerHTML = '';
-      soalList.forEach((s, i) => {
-        let cls = 'bg-slate-200 text-slate-700 hover:bg-slate-300';
-        if (jawaban[s.id]) cls = 'bg-blue-600 text-white hover:bg-blue-700';
-        if (ragu.has(s.id)) cls = 'bg-yellow-400 text-white hover:bg-yellow-500';
-        
-        const borderClass = (i === current) ? 'ring-2 ring-blue-500 ring-offset-1' : '';
-        
-        g.innerHTML += `<button onclick="gotoSoal(${i})" class="w-full aspect-square rounded text-xs font-bold ${cls} ${borderClass} transition-all">${i+1}</button>`;
-      });
-      
-      // Update progress text
-      const dijawab = Object.keys(jawaban).length;
-      document.getElementById('navProgress').textContent = `${dijawab}/${soalList.length}`;
-    }
-
-    function gotoSoal(i) { current = i; renderSoal(); }
-
-    function confirmSubmit() {
-      const belum = soalList.length - Object.keys(jawaban).length;
-      if (belum > 0 && !confirm(`Masih ada ${belum} soal belum dijawab. Yakin ingin menyelesaikan ujian?`)) return;
-      doSubmit(false);
-    }
-
-    async function doSubmit(auto) {
-      if (!auto && !confirm('Kirim jawaban dan lihat hasil sekarang?')) return;
-      clearInterval(timerInterval);
-      
-      // Tampilkan loading overlay
-      document.body.innerHTML += `<div class="fixed inset-0 bg-white/80 backdrop-blur-sm z-[999] flex items-center justify-center flex-col">
-        <i class="fa-solid fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
-        <p class="font-bold text-slate-700">Menyimpan hasil...</p>
-      </div>`;
-
-      try {
-        // Hitung skor
-        let twk = 0, tiu = 0, tkp = 0;
-        let benarTWK = 0, benarTIU = 0;
-        soalList.forEach(s => {
-          const jw = jawaban[s.id];
-          if (!jw) return;
-          const kat = s.kategori;
-          if (kat === 'TWK' || kat === 'TIU') {
-            if (jw === s.jawabanBenar) {
-              if (kat === 'TWK') { twk += 5; benarTWK++; }
-              if (kat === 'TIU') { tiu += 5; benarTIU++; }
-            }
-          } else if (kat === 'TKP') {
-            const skor = (s.skor && s.skor[jw.toLowerCase()]) || 0;
-            tkp += skor;
-          }
-        });
-        
-        const total = twk + tiu + tkp;
-        // SKD CPNS 2024/2025 passing grade: TWK 65, TIU 80, TKP 166, Total 311
-        const lulus = twk >= 65 && tiu >= 80 && tkp >= 166 && total >= 311; 
-        const waktu = Math.floor((Date.now() - startTime) / 1000);
-
-        const hasilData = {
-          kode: sess.kode,
-          tryoutId,
-          namaTryout: document.getElementById('namaTryout').textContent,
-          twk, tiu, tkp, total, lulus,
-          benarTWK, benarTIU,
-          jawaban,
-          waktuPengerjaan: waktu,
-          tanggal: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        const ref = await db.collection('hasil').add(hasilData);
-        location.href = 'hasil.html?id=' + ref.id;
-        
-      } catch (e) {
-        alert('Gagal menyimpan hasil: ' + e.message);
-        location.reload();
-      }
-    }
-
-    init();
-  </script>
-</body>
-</html>
+      if (ragu.has(id)) ragu.delete
