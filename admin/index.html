@@ -61,11 +61,41 @@
 
     <!-- OVERVIEW -->
     <div id="panel-overview" class="tabPanel">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Total Peserta</div><div id="ovPeserta" class="text-3xl font-black text-blue-600">-</div></div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Total Soal</div><div id="ovSoal" class="text-3xl font-black text-purple-600">-</div></div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Pending Daftar</div><div id="ovPending" class="text-3xl font-black text-yellow-600">-</div></div>
-        <div class="bg-white rounded-2xl p-5 shadow-sm"><div class="text-xs font-bold text-slate-500">Pendapatan (Approved)</div><div id="ovPendapatan" class="text-xl font-black text-green-600">-</div></div>
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="font-bold text-lg text-slate-800">Ringkasan Keuangan & Data</h2>
+        <button onclick="showTarikDana()" class="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-sm">
+          <i class="fa-solid fa-money-bill-wave mr-1.5"></i>Tarik Dana
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
+          <div class="text-xs font-bold text-slate-500">Total Peserta</div>
+          <div id="ovPeserta" class="text-3xl font-black text-blue-600">-</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
+          <div class="text-xs font-bold text-slate-500">Total Soal</div>
+          <div id="ovSoal" class="text-3xl font-black text-purple-600">-</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
+          <div class="text-xs font-bold text-slate-500">Pending Daftar</div>
+          <div id="ovPending" class="text-3xl font-black text-yellow-600">-</div>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm">
+          <div class="text-xs font-bold text-slate-500">Saldo Bersih Pendapatan</div>
+          <div id="ovPendapatan" class="text-xl font-black text-green-600">-</div>
+          <div id="ovInfoTarik" class="text-[11px] text-slate-400 mt-1">Kotor: Rp 0 · Ditarik: Rp 0</div>
+        </div>
+      </div>
+
+      <!-- RIWAYAT PENARIKAN DANA -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <h3 class="font-bold text-base text-slate-800 mb-3">
+          <i class="fa-solid fa-clock-rotate-left text-emerald-600 mr-2"></i>Riwayat Penarikan Dana
+        </h3>
+        <div id="riwayatTarikList" class="space-y-2 max-h-[350px] overflow-y-auto">
+          <p class="text-center text-slate-400 py-4 text-sm">Memuat riwayat...</p>
+        </div>
       </div>
     </div>
 
@@ -224,6 +254,34 @@
         </div>
         <div id="produkList" class="space-y-2"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TARIK DANA -->
+<div id="modalTarikDana" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl max-w-md w-full p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold"><i class="fa-solid fa-money-bill-wave text-emerald-600 mr-2"></i>Tarik Dana</h3>
+      <button onclick="closeModal('modalTarikDana')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+    </div>
+    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 mb-4">
+      <div class="text-xs text-emerald-700 font-semibold">Saldo Tersedia Saat Ini:</div>
+      <div id="saldoTersediaText" class="text-lg font-black text-emerald-700">Rp 0</div>
+    </div>
+    <div class="space-y-3">
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">Nominal Penarikan (Rp)</label>
+        <input id="tdNominal" type="number" placeholder="Cth: 500000" class="w-full px-4 py-2.5 rounded-lg border text-sm">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-1">Keterangan / Tujuan Rekening</label>
+        <input id="tdKeterangan" placeholder="Cth: Penarikan ke BCA / Operasional" class="w-full px-4 py-2.5 rounded-lg border text-sm">
+      </div>
+    </div>
+    <div class="flex gap-2 mt-5">
+      <button onclick="closeModal('modalTarikDana')" class="flex-1 bg-slate-100 py-3 rounded-xl font-bold">Batal</button>
+      <button id="btnSaveTarikDana" onclick="saveTarikDana()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700">Konfirmasi Tarik</button>
     </div>
   </div>
 </div>
@@ -505,6 +563,7 @@ const COLLECTION_HASIL = 'hasil';
 let isAdmin = false;
 let currentTab = 'overview';
 let savedGroupLink = '';
+let saldoTersedia = 0;
 
 let allTryoutList = [];
 let editTryoutId = null;
@@ -598,23 +657,105 @@ function showTab(name) {
   if (name === 'produk') loadProduk();
 }
 
-// ============ OVERVIEW ============
+// ============ OVERVIEW & TARIK DANA ============
 async function loadOverview() {
   try {
-    const [pesertaSnap, soalSnap, pendaftarSnap, approvedSnap] = await Promise.all([
+    const [pesertaSnap, soalSnap, pendaftarSnap, approvedSnap, tarikSnap] = await Promise.all([
       db.collection('peserta').get(),
       db.collection('soal').get(),
       db.collection('pendaftar').where('status','==','pending').get(),
-      db.collection('pendaftar').where('status','==','approved').get()
+      db.collection('pendaftar').where('status','==','approved').get(),
+      db.collection('penarikan_dana').orderBy('createdAt', 'desc').get()
     ]);
+
     document.getElementById('ovPeserta').textContent = pesertaSnap.size;
     document.getElementById('ovSoal').textContent = soalSnap.size;
     document.getElementById('ovPending').textContent = pendaftarSnap.size;
     
-    let totalPendapatan = 0;
-    approvedSnap.forEach(d => totalPendapatan += (d.data().totalBayar || 0));
-    document.getElementById('ovPendapatan').textContent = 'Rp ' + totalPendapatan.toLocaleString('id-ID');
+    let totalKotor = 0;
+    approvedSnap.forEach(d => totalKotor += (Number(d.data().totalBayar) || 0));
+
+    let totalDitarik = 0;
+    const riwayatList = [];
+    tarikSnap.forEach(d => {
+      const data = d.data();
+      totalDitarik += (Number(data.nominal) || 0);
+      riwayatList.push({ id: d.id, ...data });
+    });
+
+    saldoTersedia = totalKotor - totalDitarik;
+
+    document.getElementById('ovPendapatan').textContent = 'Rp ' + saldoTersedia.toLocaleString('id-ID');
+    document.getElementById('ovInfoTarik').textContent = `Kotor: Rp ${totalKotor.toLocaleString('id-ID')} · Ditarik: Rp ${totalDitarik.toLocaleString('id-ID')}`;
+
+    renderRiwayatTarik(riwayatList);
   } catch (e) { console.error(e); }
+}
+
+function renderRiwayatTarik(list) {
+  const box = document.getElementById('riwayatTarikList');
+  if (list.length === 0) {
+    box.innerHTML = '<p class="text-center text-slate-400 py-4 text-sm">Belum ada riwayat penarikan dana.</p>';
+    return;
+  }
+
+  box.innerHTML = list.map(item => `
+    <div class="border rounded-xl p-3 flex justify-between items-center gap-2 hover:bg-slate-50">
+      <div>
+        <p class="font-bold text-sm text-slate-800">- Rp ${(Number(item.nominal) || 0).toLocaleString('id-ID')}</p>
+        <p class="text-xs text-slate-500">${item.keterangan || 'Penarikan dana'} · <span class="text-slate-400">${formatDateID(item.createdAt)}</span></p>
+      </div>
+      <button onclick="hapusTarikDana('${item.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-xs" title="Batalkan / Hapus Catatan">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+function showTarikDana() {
+  document.getElementById('saldoTersediaText').textContent = 'Rp ' + saldoTersedia.toLocaleString('id-ID');
+  document.getElementById('tdNominal').value = '';
+  document.getElementById('tdKeterangan').value = '';
+  openModal('modalTarikDana');
+}
+
+async function saveTarikDana() {
+  const nominal = Number(document.getElementById('tdNominal').value) || 0;
+  const keterangan = document.getElementById('tdKeterangan').value.trim();
+
+  if (nominal <= 0) {
+    alert('Masukkan nominal penarikan yang valid.');
+    return;
+  }
+  if (nominal > saldoTersedia) {
+    alert(`Saldo tidak mencukupi! Maksimal penarikan saat ini: Rp ${saldoTersedia.toLocaleString('id-ID')}`);
+    return;
+  }
+
+  const btn = document.getElementById('btnSaveTarikDana');
+  btn.disabled = true;
+
+  try {
+    await db.collection('penarikan_dana').add({
+      nominal,
+      keterangan: keterangan || 'Penarikan Dana',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    closeModal('modalTarikDana');
+    await loadOverview();
+    alert(`✅ Penarikan dana sebesar Rp ${nominal.toLocaleString('id-ID')} berhasil dicatat!`);
+  } catch (err) {
+    alert('Gagal mencatat penarikan: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function hapusTarikDana(id) {
+  if (!confirm('Hapus catatan penarikan ini? Saldo pendapatan akan dikembalikan.')) return;
+  await db.collection('penarikan_dana').doc(id).delete();
+  loadOverview();
 }
 
 // ============ SETTINGS ============
