@@ -12,23 +12,19 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
       background: 
-        linear-gradient(135deg, rgba(248,250,252,0.85) 0%, rgba(226,232,240,0.85) 100%),
+        linear-gradient(135deg, rgba(248,250,252,0.92) 0%, rgba(226,232,240,0.92) 100%),
         url('backgroundKJA.png') center/cover no-repeat fixed;
-      background-attachment: fixed;
     }
-    @media (max-width: 768px) {
-      body { background-attachment: scroll; }
-    }
+    @media (max-width: 768px) { body { background-attachment: scroll; } }
+    
+    /* Animasi Dropdown */
+    .dropdown-enter { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body class="min-h-screen">
 
-  <!-- Promo Banner -->
-  <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white py-2 px-4 text-center text-xs font-bold">
-    🔥 <strong>PROMO!</strong> Upgrade ke Paket 2 - Diskon 30%, dari Rp 149rb jadi Rp 104rb · <a href="https://wa.me/6285696409288?text=Saya%20mau%20upgrade%20ke%20Paket%202" class="underline">Upgrade Sekarang →</a>
-  </div>
-
-  <nav class="bg-white border-b shadow-sm sticky top-0 z-40">
+  <nav class="bg-white/95 backdrop-blur-md border-b shadow-sm sticky top-0 z-40">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-graduation-cap text-white"></i></div>
@@ -39,59 +35,97 @@
           <p class="text-xs text-slate-500">Kode Peserta</p>
           <p id="kodeUser" class="font-mono font-bold text-slate-800 text-sm">-</p>
         </div>
-        <button onclick="logoutConfirm()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-red-100"><i class="fa-solid fa-power-off"></i></button>
+        
+        <!-- Profile Dropdown Toggle -->
+        <div class="relative">
+          <button onclick="toggleProfileMenu()" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition">
+            <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <i class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
+          </button>
+          
+          <!-- Dropdown Menu -->
+          <div id="profileMenu" class="hidden absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 dropdown-enter">
+            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 rounded-t-2xl">
+              <p class="text-sm font-bold text-slate-800 truncate" id="menuNama">Peserta</p>
+              <p class="text-xs text-slate-500 font-mono" id="menuKode">-</p>
+              <div class="mt-2 inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                <i class="fa-solid fa-crown"></i> <span id="menuPaket">Paket -</span>
+              </div>
+            </div>
+            
+            <div class="py-2">
+              <button onclick="openRiwayat()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition">
+                <i class="fa-solid fa-clock-rotate-left w-5 text-blue-500"></i> Riwayat Hasil
+              </button>
+              <button onclick="openPencapaian()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition">
+                <i class="fa-solid fa-trophy w-5 text-yellow-500"></i> Pencapaian
+              </button>
+              <button onclick="openAffiliateStats()" class="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition">
+                <i class="fa-solid fa-money-bill-trend-up w-5 text-green-500"></i> Komisi Affiliate
+              </button>
+            </div>
+            
+            <div class="border-t border-slate-100 my-1"></div>
+            
+            <div class="py-2">
+              <a href="https://wa.me/6285696409288" target="_blank" class="w-full text-left px-4 py-2.5 text-sm hover:bg-blue-50 hover:text-blue-600 flex items-center gap-3 transition">
+                <i class="fa-brands fa-whatsapp w-5 text-green-500"></i> Bantuan & Panduan
+              </a>
+              <button onclick="logoutConfirm()" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
+                <i class="fa-solid fa-power-off w-5"></i> Keluar Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
 
   <main class="container mx-auto px-4 py-8 max-w-6xl">
 
-    <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-8 text-white mb-8 shadow-xl">
-      <h1 class="text-2xl md:text-3xl font-extrabold mb-2">Selamat Datang, <span id="namaUser">Peserta</span>! 👋</h1>
-      <p class="text-blue-100">Paket Aktif: <span id="paketUser" class="font-bold">-</span> · Masa Aktif: <span id="expiredUser" class="font-bold">-</span></p>
-    </div>
-
-    <!-- Promo Tryout Rabu & Sabtu -->
-    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 mb-6 text-white flex items-center justify-between gap-4 flex-wrap">
-      <div class="flex items-center gap-3">
-        <i class="fa-solid fa-gift text-2xl"></i>
-        <div>
-          <p class="font-bold">Tryout Gratis Setiap Rabu & Sabtu!</p>
-          <p class="text-sm text-green-100">Ajak temanmu ikut tryout gratis 2× seminggu</p>
-        </div>
+    <!-- Greeting -->
+    <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-3xl p-8 text-white mb-8 shadow-xl relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
+      <div class="relative z-10">
+        <h1 class="text-2xl md:text-3xl font-extrabold mb-2">Selamat Datang, <span id="namaUser">Peserta</span>! 👋</h1>
+        <p class="text-blue-100">Paket Aktif: <span id="paketUser" class="font-bold">-</span> · Masa Aktif: <span id="expiredUser" class="font-bold">-</span></p>
       </div>
-      <a href="tryoutgratis.html" class="bg-white text-green-600 px-4 py-2 rounded-xl font-bold text-sm hover:bg-green-50">Cek Sekarang →</a>
     </div>
 
     <div class="grid md:grid-cols-3 gap-6">
-      <div class="md:col-span-2">
-        <h2 class="text-xl font-bold mb-4"><i class="fa-solid fa-list-check text-blue-600 mr-2"></i>Paket Tryout</h2>
+      
+      <!-- MAIN CONTENT -->
+      <div class="md:col-span-2 space-y-6">
+        <h2 class="text-xl font-bold mb-2 text-slate-800"><i class="fa-solid fa-list-check text-blue-600 mr-2"></i>Paket Tryout Anda</h2>
+        
+        <!-- List Tryout -->
         <div id="listTryout" class="space-y-3">
           <div class="bg-white rounded-2xl p-6 animate-pulse"><div class="h-4 bg-slate-200 rounded w-1/2"></div></div>
         </div>
 
-        <!-- Promo upgrade banner -->
-        <div class="mt-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white">
+        <!-- Program Affiliate Card -->
+        <div class="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-6 text-white shadow-lg">
           <div class="flex items-center gap-3 mb-3">
-            <i class="fa-solid fa-crown text-3xl text-yellow-200"></i>
+            <i class="fa-solid fa-users-viewfinder text-3xl text-yellow-300"></i>
             <div>
-              <h3 class="font-extrabold text-lg">Mau Lulus CPNS Tahun Ini?</h3>
-              <p class="text-sm text-white/90">Upgrade paket untuk akses tryout unlimited + materi lengkap</p>
+              <h3 class="font-extrabold text-lg">Program Affiliate 10%</h3>
+              <p class="text-sm text-blue-100">Ajak teman, dapat komisi dari setiap pembelian!</p>
             </div>
           </div>
-          <div class="bg-white/20 backdrop-blur rounded-xl p-3 mb-3">
-            <p class="text-xs font-bold">🔥 Diskon 30% · Hanya untuk member aktif</p>
-            <p class="text-sm mt-1"><span class="line-through text-white/70">Rp 149.000</span> → <strong class="text-lg">Rp 104.000</strong></p>
+          <div class="bg-black/20 rounded-xl p-3 flex items-center justify-between gap-2 mb-3">
+            <span class="text-xs font-mono truncate" id="refLink">https://...</span>
+            <button onclick="copyRefLink()" class="bg-white text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap hover:bg-indigo-50">Copy Link</button>
           </div>
-          <a href="https://wa.me/6285696409288?text=Halo%20Admin,%20saya%20ingin%20upgrade%20paket" target="_blank" class="block bg-white text-orange-600 font-bold py-3 rounded-xl text-center hover:bg-orange-50">
-            <i class="fa-solid fa-bolt mr-1"></i> Upgrade Sekarang
-          </a>
+          <p class="text-xs text-blue-200">Bagikan link di atas. Teman Anda dapat diskon Rp 10.000, Anda dapat komisi 10%!</p>
         </div>
       </div>
 
+      <!-- SIDEBAR -->
       <div class="space-y-6">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border">
-          <h3 class="font-bold mb-4">📊 Statistik</h3>
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-sm border">
+          <h3 class="font-bold mb-4">📊 Statistik Anda</h3>
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-blue-50 rounded-xl p-3 text-center">
               <div id="statTotal" class="text-2xl font-black text-blue-600">0</div>
@@ -104,21 +138,81 @@
           </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border">
+        <!-- Widget 3 Paket Promo -->
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-sm border">
+          <h3 class="font-bold mb-4">🚀 Upgrade Paket</h3>
+          <div class="space-y-3">
+            <div class="border rounded-xl p-3 flex justify-between items-center hover:border-blue-400 transition cursor-pointer" onclick="upgrade(2)">
+              <div>
+                <p class="font-bold text-sm">Paket 2 - Sukses</p>
+                <p class="text-xs text-slate-500">15 Tryout + Materi SKD</p>
+              </div>
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Rp 149rb</span>
+            </div>
+            <div class="border rounded-xl p-3 flex justify-between items-center hover:border-blue-400 transition cursor-pointer" onclick="upgrade(3)">
+              <div>
+                <p class="font-bold text-sm">Paket 3 - Master</p>
+                <p class="text-xs text-slate-500">20 Tryout + Semua Fitur</p>
+              </div>
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">Rp 189rb</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white/95 backdrop-blur rounded-2xl p-6 shadow-sm border">
           <h3 class="font-bold mb-3"><i class="fa-brands fa-whatsapp text-green-600 mr-2"></i>Grup Belajar</h3>
           <p class="text-xs text-slate-500 mb-3">Gabung grup WA untuk info & materi</p>
           <a href="tryoutgratis.html" class="block bg-green-600 text-white font-bold py-2.5 rounded-xl text-center text-sm hover:bg-green-700">
             <i class="fa-solid fa-users mr-1"></i> Lihat Semua Grup
           </a>
         </div>
-
-        <div class="bg-white rounded-2xl p-6 shadow-sm border">
-          <h3 class="font-bold mb-3">💡 Tips Hari Ini</h3>
-          <p class="text-sm text-slate-600" id="tipsText">Latihan konsisten 30 menit/hari lebih efektif dari belajar 4 jam sekali seminggu.</p>
-        </div>
       </div>
     </div>
   </main>
+
+  <!-- MODAL RIWAYAT HASIL -->
+  <div id="modalRiwayat" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold"><i class="fa-solid fa-clock-rotate-left text-blue-600 mr-2"></i>Riwayat Tryout</h3>
+        <button onclick="closeModal('modalRiwayat')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <div id="riwayatList" class="space-y-2 max-h-[60vh] overflow-y-auto">
+        <p class="text-center text-slate-400 py-4">Memuat data...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PENCAPAIAN -->
+  <div id="modalPencapaian" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i>Pencapaian</h3>
+        <button onclick="closeModal('modalPencapaian')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <div class="grid grid-cols-2 gap-4" id="pencapaianList">
+        <!-- Diisi via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AFFILIATE -->
+  <div id="modalAffiliate" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold"><i class="fa-solid fa-money-bill-trend-up text-green-600 mr-2"></i>Komisi Affiliate</h3>
+        <button onclick="closeModal('modalAffiliate')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+      <div class="bg-green-50 rounded-2xl p-4 text-center mb-4 border border-green-100">
+        <p class="text-sm text-green-800 mb-1">Total Komisi Terkumpul</p>
+        <p class="text-3xl font-black text-green-600" id="totalKomisi">Rp 0</p>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">Daftar teman yang mendaftar melalui link Anda:</p>
+      <div id="affiliateList" class="space-y-2 max-h-[40vh] overflow-y-auto">
+        <p class="text-center text-slate-400 py-4 text-sm">Belum ada referral.</p>
+      </div>
+    </div>
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -128,13 +222,152 @@
     const sess = KJ.getSession();
     if (!sess) location.href = 'login.html';
 
+    // Set Data User
     document.getElementById('kodeUser').textContent = sess.kode;
     document.getElementById('namaUser').textContent = sess.nama || 'Peserta';
     document.getElementById('paketUser').textContent = 'Paket ' + (sess.paket || '-');
     document.getElementById('expiredUser').textContent = sess.expired ? KJ.fmtDate(sess.expired) : 'Unlimited';
 
+    // Set Menu Profile
+    document.getElementById('menuNama').textContent = sess.nama || 'Peserta';
+    document.getElementById('menuKode').textContent = sess.kode;
+    document.getElementById('menuPaket').textContent = 'Paket ' + (sess.paket || '-');
+    
+    // Set Referral Link
+    const refLink = location.origin + '/registrasi.html?ref=' + sess.kode;
+    document.getElementById('refLink').textContent = refLink;
+
+    // Toggle Dropdown Menu
+    function toggleProfileMenu() {
+      const menu = document.getElementById('profileMenu');
+      menu.classList.toggle('hidden');
+    }
+
+    // Tutup dropdown jika klik di luar
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('profileMenu');
+      const btn = e.target.closest('button[onclick="toggleProfileMenu()"]');
+      if (!menu.contains(e.target) && !btn) menu.classList.add('hidden');
+    });
+
+    function copyRefLink() {
+      navigator.clipboard.writeText(refLink);
+      KJ.toast('Link Affiliate berhasil disalin!', 'success');
+    }
+
+    function upgrade(paket) {
+      const text = `Halo Admin, saya (${sess.kode}) ingin upgrade ke Paket ${paket}. Mohon info pembayarannya.`;
+      window.open(`https://wa.me/6285696409288?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
     function logoutConfirm() { if (confirm('Keluar dari dashboard?')) KJ.logout(); }
 
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+    // ==================== RIWAYAT HASIL ====================
+    async function openRiwayat() {
+      openModal('modalRiwayat');
+      const box = document.getElementById('riwayatList');
+      box.innerHTML = '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Memuat...</p>';
+      
+      try {
+        const snap = await db.collection('hasil').where('kode', '==', sess.kode).get();
+        const list = [];
+        snap.forEach(d => list.push(d.data()));
+        list.sort((a,b) => (b.tanggal?.seconds||0) - (a.tanggal?.seconds||0));
+
+        if (list.length === 0) { box.innerHTML = '<p class="text-center text-slate-500 py-4 text-sm">Belum ada riwayat tryout.</p>'; return; }
+        
+        box.innerHTML = list.map(h => `
+          <div class="border rounded-xl p-3 flex justify-between items-center bg-slate-50">
+            <div>
+              <p class="font-bold text-sm text-slate-800">${h.namaTryout || 'Tryout'}</p>
+              <p class="text-xs text-slate-500">${h.tanggal ? KJ.fmtDate(h.tanggal) : '-'}</p>
+              <p class="text-xs font-bold ${h.lulus?'text-green-600':'text-red-500'}">${h.lulus?'Lulus':'Belum Lulus'} · Skor: ${h.total}</p>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) { box.innerHTML = '<p class="text-center text-red-500 text-sm py-4">Gagal memuat riwayat.</p>'; }
+    }
+
+    // ==================== PENCAPAIAN ====================
+    async function openPencapaian() {
+      openModal('modalPencapaian');
+      const box = document.getElementById('pencapaianList');
+      
+      try {
+        const snap = await db.collection('hasil').where('kode', '==', sess.kode).get();
+        let totalSelesai = 0;
+        let skorTertinggi = 0;
+        snap.forEach(d => {
+          totalSelesai++;
+          if (d.data().total > skorTertinggi) skorTertinggi = d.data().total;
+        });
+
+        const badges = [
+          { id: 1, name: 'Langkah Pertama', desc: 'Selesaikan 1 Tryout', icon: 'fa-shoe-prints', color: 'bg-blue-100 text-blue-600', unlocked: totalSelesai >= 1 },
+          { id: 2, name: 'Pejuang Konsisten', desc: 'Selesaikan 5 Tryout', icon: 'fa-fire', color: 'bg-orange-100 text-orange-600', unlocked: totalSelesai >= 5 },
+          { id: 3, name: 'Skor Emas', desc: 'Dapatkan Skor > 400', icon: 'fa-medal', color: 'bg-yellow-100 text-yellow-600', unlocked: skorTertinggi > 400 },
+          { id: 4, name: 'Master SKD', desc: 'Selesaikan 10 Tryout', icon: 'fa-crown', color: 'bg-purple-100 text-purple-600', unlocked: totalSelesai >= 10 }
+        ];
+
+        box.innerHTML = badges.map(b => `
+          <div class="border rounded-xl p-3 text-center ${b.unlocked?'border-green-300 bg-green-50':'border-slate-200 bg-slate-50 opacity-50 grayscale'}">
+            <div class="w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-2 ${b.color}">
+              <i class="fa-solid ${b.icon} text-xl"></i>
+            </div>
+            <p class="font-bold text-xs mb-0.5">${b.name}</p>
+            <p class="text-[10px] text-slate-500">${b.desc}</p>
+          </div>
+        `).join('');
+      } catch (e) { box.innerHTML = '<p class="text-center text-red-500">Gagal memuat.</p>'; }
+    }
+
+    // ==================== AFFILIATE ====================
+    async function openAffiliateStats() {
+      openModal('modalAffiliate');
+      const box = document.getElementById('affiliateList');
+      box.innerHTML = '<p class="text-center text-slate-400 py-4"><i class="fa-solid fa-spinner fa-spin"></i> Memuat data...</p>';
+      
+      try {
+        const snap = await db.collection('pendaftar').where('referral', '==', sess.kode).get();
+        if (snap.empty) {
+          box.innerHTML = '<p class="text-center text-slate-500 py-4 text-sm">Belum ada teman yang mendaftar via link Anda.</p>';
+          document.getElementById('totalKomisi').textContent = 'Rp 0';
+          return;
+        }
+
+        let totalKomisi = 0;
+        const rows = [];
+        snap.forEach(d => {
+          const p = d.data();
+          // Asumsi komisi dihitung jika sudah approved
+          const komisi = (p.status === 'approved') ? Math.round((p.totalBayar || 0) * 0.1) : 0;
+          totalKomisi += komisi;
+          rows.push({...p, komisi});
+        });
+
+        document.getElementById('totalKomisi').textContent = 'Rp ' + totalKomisi.toLocaleString('id-ID');
+        
+        box.innerHTML = rows.map(r => `
+          <div class="border rounded-xl p-3 flex justify-between items-center text-sm">
+            <div>
+              <p class="font-bold text-slate-800">${r.nama}</p>
+              <p class="text-xs text-slate-500">Paket ${r.paket} · ${r.status}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-green-600">Rp ${r.komisi.toLocaleString('id-ID')}</p>
+              <p class="text-[10px] text-slate-400">Komisi 10%</p>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        box.innerHTML = '<p class="text-center text-red-500 text-sm py-4">Gagal memuat data affiliate.</p>';
+      }
+    }
+
+    // ==================== LOAD TRYOUTS ====================
     async function loadTryouts() {
       try {
         const snap = await db.collection('tryout').where('aktif', '==', true).get();
@@ -166,7 +399,7 @@
           if (h) { totalSelesai++; if (h.total > best) best = h.total; }
           const isDone = !!h;
           list.innerHTML += `
-            <div class="bg-white rounded-2xl p-5 border border-slate-200 hover:shadow-lg transition flex items-center justify-between gap-4 flex-wrap">
+            <div class="bg-white/95 backdrop-blur rounded-2xl p-5 border border-slate-200 hover:shadow-lg transition flex items-center justify-between gap-4 flex-wrap">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 ${isDone?'bg-green-100 text-green-600':'bg-blue-50 text-blue-600'} rounded-xl flex items-center justify-center font-black text-lg">${t.urutan||'#'}</div>
                 <div>
@@ -185,20 +418,8 @@
         document.getElementById('statBest').textContent = best || '-';
       } catch (e) {
         console.error(e);
-        document.getElementById('listTryout').innerHTML = '<div class="bg-red-50 text-red-600 rounded-2xl p-6">Gagal memuat: ' + e.message + '</div>';
       }
     }
-
-    // Tips random
-    const tips = [
-      'Latihan konsisten 30 menit/hari lebih efektif dari belajar 4 jam sekali seminggu.',
-      'Fokus ke soal yang sering keluar (FR) untuk efisiensi belajar.',
-      'Di TIU, kuasai deret angka dan silogisme - sering muncul dan poinnya besar.',
-      'Di TKP, pilih jawaban yang menunjukkan inisiatif & kerja sama tim.',
-      'Istirahat cukup sebelum ujian. Otak butuh tidur untuk konsolidasi memori.',
-      'Gunakan teknik skimming saat membaca soal cerita panjang - hemat waktu!'
-    ];
-    document.getElementById('tipsText').textContent = tips[Math.floor(Math.random() * tips.length)];
 
     (async () => {
       if (!auth.currentUser) { try { await auth.signInAnonymously(); } catch{} }
