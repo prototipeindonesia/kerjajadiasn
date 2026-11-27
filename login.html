@@ -47,6 +47,17 @@
       const kode = document.getElementById('kodeInput').value.trim().toUpperCase();
       btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memeriksa...';
 
+      // Di dalam event submit login, setelah data peserta didapat:
+const deviceId = localStorage.getItem('device_id') || Math.random().toString(36).substring(2, 15);
+localStorage.setItem('device_id', deviceId);
+
+if (data.deviceId && data.deviceId !== deviceId) {
+  throw new Error('Akun ini sedang digunakan di perangkat lain. Silakan logout dari perangkat tersebut.');
+}
+
+// Update peserta dengan deviceId saat ini
+await db.collection('peserta').doc(kode).update({ deviceId: deviceId, lastLogin: new Date() });
+      
       try {
         if (!auth.currentUser) await auth.signInAnonymously();
         const doc = await db.collection('peserta').doc(kode).get();
