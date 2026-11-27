@@ -45,34 +45,45 @@
       e.preventDefault();
       const btn = document.getElementById('btnLogin');
       const kode = document.getElementById('kodeInput').value.trim().toUpperCase();
-      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memeriksa...';
-
-      // Di dalam event submit login, setelah data peserta didapat:
-const deviceId = localStorage.getItem('device_id') || Math.random().toString(36).substring(2, 15);
-localStorage.setItem('device_id', deviceId);
-
-if (data.deviceId && data.deviceId !== deviceId) {
-  throw new Error('Akun ini sedang digunakan di perangkat lain. Silakan logout dari perangkat tersebut.');
-}
-
-// Update peserta dengan deviceId saat ini
-await db.collection('peserta').doc(kode).update({ deviceId: deviceId, lastLogin: new Date() });
       
+      btn.disabled = true; 
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Memeriksa...';
+
       try {
         if (!auth.currentUser) await auth.signInAnonymously();
+        
         const doc = await db.collection('peserta').doc(kode).get();
         if (!doc.exists) throw new Error('Kode tidak ditemukan');
+        
         const data = doc.data();
         if (!data.aktif) throw new Error('Kode sudah tidak aktif');
         if (data.expired && data.expired.toDate() < new Date()) throw new Error('Masa aktif kode sudah habis');
 
-        KJ.setSession({ kode, ...data });
+        // 1. Ambil atau buat deviceId baru
+        const deviceId = localStorage.getItem('device_id') || Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('device_id', deviceId);
+
+        // 2. Validasi apakah akun sedang dipakai di perangkat lain
+        if (data.deviceId && data.deviceId !== deviceId) {
+          throw new Error('Akun ini sedang digunakan di perangkat lain. Silakan logout dari perangkat tersebut.');
+        }
+
+        // 3. Update deviceId dan waktu login terakhir ke Firestore
+        await db.collection('peserta').doc(kode).update({ 
+          deviceId: deviceId, 
+          lastLogin: new Date() 
+        });
+
+        // 4. Simpan sesi (sertakan deviceId terbaru agar sinkron) & arahkan ke dashboard
+        KJ.setSession({ kode, ...data, deviceId });
         KJ.toast('✅ Login berhasil!', 'success');
         setTimeout(() => location.href = 'dashboard.html', 800);
+
       } catch (err) {
         KJ.toast('❌ ' + err.message, 'error');
       } finally {
-        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Masuk Dashboard';
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Masuk Dashboard';
       }
     });
   </script>
